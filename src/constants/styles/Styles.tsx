@@ -221,7 +221,7 @@ export const STYLES = {
         marginHorizontal: 35,
         fontSize: 18,
         marginVertical: 6,
-        color: COLORS.powderBlue,
+        color: COLORS.darkGray,
         fontFamily: 'Inter_600SemiBold',
       },
 
@@ -1203,8 +1203,10 @@ export const STYLES = {
     },
 
     gridButton: {
+      width: 92,
+      height: 92,
       borderRadius: 10,
-      backgroundColor: COLORS.clearWhite,
+      backgroundColor: COLORS.clearGray,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -1215,6 +1217,7 @@ export const STYLES = {
       paddingTop: 5.5,
       fontSize: 12,
       textAlign: 'center',
+      flexWrap: 'wrap',
     },
 
     partitionWrapper: {
@@ -1248,7 +1251,7 @@ export const STYLES = {
     },
 
     badge: {
-      backgroundColor: COLORS.powderBlue,
+      backgroundColor: COLORS.orange,
       width: 35,
       height: 35,
       justifyContent: 'center',
@@ -1282,7 +1285,10 @@ export const STYLES = {
       flex: 1,
       marginHorizontal: 8,
       flexDirection: 'row',
-      justifyContent: 'center',
+      justifyContent: 'space-evenly',
+      backgroundColor: COLORS.lightestOrange,
+      paddingVertical: 8,
+      borderRadius: 10,
     },
 
     textWrapper: {
@@ -1302,12 +1308,13 @@ export const STYLES = {
 
     totalText: {
       fontFamily: 'Inter_700Bold',
-      fontSize: 20,
+      fontSize: 22,
       textAlign: 'center',
+      color: COLORS.darkGray,
     },
 
     title: {
-      color: COLORS.black,
+      color: COLORS.darkGray,
       fontSize: 12,
       lineHeight: 14,
       textAlign: 'center',
@@ -2596,7 +2603,7 @@ export const STYLES = {
       borderRadius: 30,
       marginTop: 20,
       width: '45%',
-      zIndex: 1
+      zIndex: 1,
     },
 
     disabledButton: {
@@ -2629,7 +2636,7 @@ export const STYLES = {
       borderRadius: 30,
       marginTop: 20,
       width: '45%',
-      zIndex: 1
+      zIndex: 1,
     },
 
     borderButtonText: {
@@ -2654,7 +2661,6 @@ export const STYLES = {
       width: '100%',
       marginTop: 15,
     },
-
 
     search: {
       fontFamily: 'Inter_400Regular',
@@ -3518,7 +3524,6 @@ export const STYLES = {
       fontFamily: 'Inter_500Medium',
       color: COLORS.lighterGray,
     },
-
 
     titleText: {
       fontFamily: 'Inter_500Medium',

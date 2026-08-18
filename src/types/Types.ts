@@ -6,7 +6,7 @@ import { ImageRequireSource } from 'react-native';
 import { MaterialCommunityIcons, Entypo, FontAwesome } from '@expo/vector-icons';
 import { CameraType } from 'expo-camera';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
-import React, { ReactNode } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { LatLng } from 'react-native-maps';
 import { TeamMember, TeamSchema } from './Teams';
@@ -355,6 +355,7 @@ export type TypeObjectValues = {
   image?: ImageRequireSource;
   withAsterisk?: boolean;
   navigate?: () => void;
+  icon?: ReactElement;
 };
 
 export type TypeClockedData = {
