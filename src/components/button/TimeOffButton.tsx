@@ -5,9 +5,8 @@
 import React, { useReducer } from 'react';
 import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
-import { Shadow } from 'react-native-shadow-2';
 
-import { STYLES, ARRAY } from 'src';
+import { STYLES, ARRAY, COLORS } from 'src';
 import { useNavigation } from 'expo-router';
 import { StateTimeOffButton, TypeNavStack, TypeObjectValues } from 'src/types/Types';
 import { useHome } from 'src/contexts/tabs';
@@ -33,14 +32,19 @@ const TimeOffButton: React.FC = () => {
     <View style={styles.container}>
       {currState.row.map((item: TypeObjectValues, index: number) => (
         <TouchableOpacity key={index} style={styles.button} onPress={item.navigate}>
-          <Shadow offset={[1, 1.2]} distance={2} style={[styles.alignWrapper, { height: currState.imageSize }]}>
-            <Image source={item.image} key={item.title} contentFit="contain" {...commonProps} />
+          <View>
+            <Text style={styles.totalText}>{item.count}</Text>
+            <Text style={styles.title}>{item.title}</Text>
+          </View>
 
-            <View>
-              <Text style={styles.totalText}>{item.count}</Text>
-              <Text style={styles.title}>{item.title}</Text>
-            </View>
-          </Shadow>
+          <View
+            style={{
+              backgroundColor: COLORS.clearWhite,
+              borderRadius: 10,
+            }}
+          >
+            <Image source={item.image} key={item.title} {...commonProps} />
+          </View>
         </TouchableOpacity>
       ))}
     </View>

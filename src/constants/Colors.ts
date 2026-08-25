@@ -12,6 +12,7 @@ export const COLORS = {
   orange: '#FF924B',
   baseOrange: '#FF5003',
   lighterOrange: '#FF9C66',
+  lightestOrange: '#ff9c662c',
 
   babyBlue: '#70C7FF',
   lightBlue: '#5D9FEF',
@@ -33,6 +34,8 @@ export const COLORS = {
   lightestGray: '#D3D3D3',
   lighterGray: '#2A2A2A73',
   lightGray: '#EAEAEA',
+  clearGray: '#eaeaea7e',
+
   gray: '#DDDD',
   darkGray: '#575757',
   shadowGray: 'rgba(119, 119, 119, 0.06)',
