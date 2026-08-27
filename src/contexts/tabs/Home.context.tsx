@@ -39,15 +39,15 @@ export const Context = createContext<TypeContext>({
   platform: '',
   params: undefined,
   state: ValuesHome.State,
-  setState: () => {},
+  setState: () => { },
   handle: ValuesHome.Handle,
-  setHandle: () => {},
+  setHandle: () => { },
 
-  onHandleEffectI: () => {},
-  onHandleEffectII: () => {},
-  onHandleBadge: () => {},
-  fetchUserDetails: () => {},
-  checkTeamMembers: () => {},
+  onHandleEffectI: () => { },
+  onHandleEffectII: () => { },
+  onHandleBadge: () => { },
+  fetchUserDetails: () => { },
+  checkTeamMembers: () => { },
 });
 
 export const CtxHome = ({ children }: { children: React.ReactNode }) => {
@@ -90,7 +90,7 @@ export const CtxHome = ({ children }: { children: React.ReactNode }) => {
       const response = await UtilsFetch.connect(
         APIMethods.GET,
         ContentTypes.JSON,
-        `${process.env.EXPO_PUBLIC_PROFILE_PERSONAL}`,
+        `${process.env.EXPO_PUBLIC_PROFILE}`,
       );
       const profile_uri = response.data.personalInformation?.photo;
       const firstName = response.data.personalInformation?.name?.firstName ?? '';
@@ -98,7 +98,7 @@ export const CtxHome = ({ children }: { children: React.ReactNode }) => {
       let updated_pic_uri = '';
       if (!!profile_uri) {
         const photo = JSON.parse(profile_uri);
-        const pic = `${process.env.EXPO_PUBLIC_REQUEST}/Uploads/Profile/` + photo.path;
+        const pic = `${process.env.EXPO_PUBLIC_REQUEST}/Uploads/EE/` + photo.path;
         updated_pic_uri = pic;
       }
       setState({
@@ -115,10 +115,8 @@ export const CtxHome = ({ children }: { children: React.ReactNode }) => {
     const removeDashFrom = DateTimeUtils.getRemoveDash(cutOffPeriod[0]);
     const removeDashTo = DateTimeUtils.getRemoveDash(cutOffPeriod[1]);
 
-    const urlQuery = `&DateField=${STRINGS.filterDateFrom}&DateFrom=${removeDashFrom}&DateTo=${removeDashTo}&sortBy=-DocumentNo`;
-
     try {
-      const counts = await useFetch.ReviewalsCounts(ValuesApprovals.State.buttons.length, urlQuery);
+      const counts = await useFetch.ReviewalsCounts(ValuesApprovals.State.buttons.length, removeDashFrom, removeDashTo);
       setReviewalCounts(counts);
     } catch (error) {
       console.error('Reviewal count fetch error:', error);
@@ -131,10 +129,8 @@ export const CtxHome = ({ children }: { children: React.ReactNode }) => {
     const removeDashFrom = DateTimeUtils.getRemoveDash(cutOffPeriod[0]);
     const removeDashTo = DateTimeUtils.getRemoveDash(cutOffPeriod[1]);
 
-    const urlQuery = `&DateField=${STRINGS.filterDateFrom}&DateFrom=${removeDashFrom}&DateTo=${removeDashTo}&sortBy=-DocumentNo`;
-
     try {
-      const counts = await useFetch.ApprovalsCounts(ValuesApprovals.State.buttons.length, urlQuery);
+      const counts = await useFetch.ApprovalsCounts(ValuesApprovals.State.buttons.length, removeDashFrom, removeDashTo);
       setApprovalCounts(counts);
     } catch (error) {
       console.error('Approval count fetch error:', error);

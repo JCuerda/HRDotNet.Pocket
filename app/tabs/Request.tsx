@@ -2,9 +2,9 @@
 // Designed by : Alex Diane Vivienne Candano
 // Developed by: Patrick William Quintana Lofranco, Jessie Cuerda
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StatusBar } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 
 import Toast from 'src/components/use/Toast';
@@ -14,34 +14,47 @@ import RequestPanel from 'src/components/panel/request/RequestPanel';
 import { COLORS, STRINGS, STYLES } from 'src';
 import { ParamsTabNav } from 'src/types/Types';
 import { useRequest } from 'src/contexts/tabs';
+import { useGlobalStore } from 'src/store/GlobalStore';
 
 const Request: React.FC = () => {
   const styles = STYLES.Request;
   const params = useRoute().params as ParamsTabNav;
-
+  const { selectedApplicationTab } = useGlobalStore()
   const {
     state,
     setState,
     handle,
     setHandle,
-
     onHandlePress,
-    onHandleEffectI,
-    onHandleEffectII,
-    onHandleEffectIII,
+    onHandleFetchRequest,
+    onHandleInitial
   } = useRequest();
 
-  useEffect(() => {
-    onHandleEffectI();
-  }, [state.selectedButton, handle.refreshing]);
+  const buttonListRef = useRef<FlatList<any>>(null);
 
   useEffect(() => {
-    onHandleEffectII();
-  }, [state.selectedButton, state.urlQuery, handle.refreshing, params]);
+    onHandleInitial()
+  }, [state.selectedButton, handle.refreshing])
 
   useEffect(() => {
-    onHandleEffectIII();
-  }, [state.selectedButton, handle.refreshing, state.urlQuery, state.page, params]);
+    onHandleFetchRequest();
+  }, [handle.refreshing, state.urlQuery, state.page, state.fetchKey, params]);
+
+  useEffect(() => {
+    setState({ selectedButton: selectedApplicationTab })
+  }, [selectedApplicationTab])
+
+  useEffect(() => {
+    if (state.selectedButton == null) return;
+
+    buttonListRef.current?.scrollToIndex({
+      index: state.selectedButton,
+      animated: true,
+      viewPosition: 0.5,
+    });
+  }, [state.selectedButton])
+
+
 
   return (
     <React.Fragment>
@@ -58,6 +71,7 @@ const Request: React.FC = () => {
           <View style={styles.wrapper}>
             {/* Tab under Request Header */}
             <FlatList
+              ref={buttonListRef}
               data={state.buttons}
               renderItem={({ item, index }) => (
                 <TouchableOpacity
@@ -79,6 +93,15 @@ const Request: React.FC = () => {
               style={styles.buttonList}
               horizontal
               showsHorizontalScrollIndicator={false}
+              onScrollToIndexFailed={(info) => {
+                setTimeout(() => {
+                  buttonListRef.current?.scrollToIndex({
+                    index: info.index,
+                    animated: true,
+                    viewPosition: 0.5,
+                  });
+                }, 100);
+              }}
             />
           </View>
 

@@ -356,8 +356,6 @@ export const useFetch = {
 
     let endPoint = `${url}?page=${state.page}&pageSize=${process.env.EXPO_PUBLIC_REQUEST_PAGESIZE + state.urlQuery} `;
 
-    console.log('endPoint', endPoint);
-
     await UtilsFetch.connect(APIMethods.GET, ContentTypes.JSON, endPoint)
       .then((response: { data: { items: SchemaRequestApplications[]; total: number } }) => {
         result = response.data?.items;
@@ -396,13 +394,16 @@ export const useFetch = {
 
   ApprovalsCounts: async (
     buttonsLength: number,
-    urlQuery: string,
+    cutOffFrom: string,
+    cutOffTo: string,
   ): Promise<Record<number, SchemaRequestApplications[]>> => {
     const counts: Record<number, SchemaRequestApplications[]> = {};
 
     await Promise.all(
       Array.from({ length: buttonsLength }).map(async (_, index) => {
         const url = UtilsFetch.panelApprovalsURL(index);
+        const field = [2, 3, 5].includes(index) ? STRINGS.filterDateFiled : STRINGS.filterDateFrom;
+        const urlQuery = `&DateField=${field}&DateFrom=${cutOffFrom}&DateTo=${cutOffTo}&sortBy=-DocumentNo`;
         const endPoint = `${url}?${urlQuery}`;
 
         try {
@@ -436,8 +437,6 @@ export const useFetch = {
     let result = [];
     let url: unknown = UtilsFetch.panelReviewalsURL(state.selectedButton);
     let endPoint = `${url}?page=${state.page}&pageSize=${process.env.EXPO_PUBLIC_REQUEST_PAGESIZE + state.urlQuery}`;
-
-    console.log('Endd', endPoint);
 
     await UtilsFetch.connect(APIMethods.GET, ContentTypes.JSON, endPoint)
       .then((response: { data: { items: SchemaRequestApplications[]; total: number } }) => {
@@ -477,13 +476,16 @@ export const useFetch = {
 
   ReviewalsCounts: async (
     buttonsLength: number,
-    urlQuery: string,
+    cutOffFrom: string,
+    cutOffTo: string,
   ): Promise<Record<number, SchemaRequestApplications[]>> => {
     const counts: Record<number, SchemaRequestApplications[]> = {};
 
     await Promise.all(
       Array.from({ length: buttonsLength }).map(async (_, index) => {
         const url = UtilsFetch.panelReviewalsURL(index);
+        const field = [2, 3, 5].includes(index) ? STRINGS.filterDateFiled : STRINGS.filterDateFrom;
+        const urlQuery = `&DateField=${field}&DateFrom=${cutOffFrom}&DateTo=${cutOffTo}&sortBy=-DocumentNo`;
         const endPoint = `${url}?${urlQuery}`;
 
         try {
@@ -501,7 +503,7 @@ export const useFetch = {
     return counts;
   },
 
-  Teams: async () => {},
+  Teams: async () => { },
 
   RequestById: async (
     nav: StackNavigationProp<ParamListBase>,
@@ -653,10 +655,10 @@ export const useFetch = {
         undefinedUri === ''
           ? formData.append('FileAttachment', parsed?.attachment?.uri)
           : formData.append('FileAttachment', {
-              name: split[split.length - 1],
-              uri: parsed?.attachment?.uri,
-              type: type,
-            });
+            name: split[split.length - 1],
+            uri: parsed?.attachment?.uri,
+            type: type,
+          });
 
         const generateEditLog = Utils.generateHistoryItem(parsed?.reason, formatName, 'New', dateParse);
 
@@ -681,8 +683,6 @@ export const useFetch = {
       formData.delete('ShiftType.ShiftType');
     }
 
-    console.log('form', JSON.stringify(Array.from(formData.entries()), null, 2));
-
     await UtilsFetch.connect(
       APIMethods.POST,
       ContentTypes.Multipart,
@@ -692,7 +692,6 @@ export const useFetch = {
 
       .then(() => {
         setHandle({ isSuccess: true });
-        console.log('Fff', formData);
       })
       .catch(async (error: TypeError) => {
         if (error.request.status === StatusCode.Unauthorized) {
@@ -701,7 +700,6 @@ export const useFetch = {
           );
         } else {
           const errors = await UtilsFetch.catchErrors(error);
-          console.log(errors);
           await UtilsFetch.catchEvent({
             error: error,
             setHandle: setHandle,
@@ -729,12 +727,12 @@ export const useFetch = {
       {
         method: APIMethods.GET,
         type: ContentTypes.JSON,
-        url: process.env.EXPO_PUBLIC_LVLEDGER! + `?LeaveParameterId=1&BusinessYear=${DateTimeUtils.getCurrYear()}`,
+        url: process.env.EXPO_PUBLIC_LVLEDGER! + `?LeaveParameterId=1`,
       },
       {
         method: APIMethods.GET,
         type: ContentTypes.JSON,
-        url: process.env.EXPO_PUBLIC_LVLEDGER! + `?LeaveParameterId=2&BusinessYear=${DateTimeUtils.getCurrYear()}`,
+        url: process.env.EXPO_PUBLIC_LVLEDGER! + `?LeaveParameterId=2`,
       },
     ])
       .then(
@@ -751,15 +749,54 @@ export const useFetch = {
           });
 
           setState({
-            leaveVacation: { count: vCount, entries: vacation.data!.entries },
+            leaveVacation: { count: 12, entries: vacation.data!.entries },
             leaveSick: { count: sCount, entries: sick.data!.entries },
           });
         }),
       )
       .catch(async (error) => {
-        console.error('err: ', error.response.data.errorCodes[0]);
+        const errors = await UtilsFetch.catchErrors(error);
+
       })
       .finally(() => setHandle({ isLoading: false, refreshing: false }));
+  },
+
+  LeaveBalances: async (
+    nav: StackNavigationProp<ParamListBase>,
+    setState: React.Dispatch<Partial<StateHome>>,
+    handle: TypeHandle,
+    setHandle: React.Dispatch<Partial<TypeHandle>>,
+  ) => {
+    setHandle({ isLoading: true });
+    await UtilsFetch.connect(
+      APIMethods.GET,
+      ContentTypes.JSON,
+      `${process.env.EXPO_PUBLIC_LEAVE_BALANCES}`,
+    ).then((response) => {
+
+      const emplpyeeBalance = response.data
+
+      const ptoBalance =
+        emplpyeeBalance.leaveBalances.find(
+          (leave: { id: number, balance: number, name: string }) => leave.id === 1
+        )?.balance ?? 0;
+
+      const sickBalance =
+        emplpyeeBalance.leaveBalances.find(
+          (leave: { id: number, balance: number, name: string }) => leave.id === 2
+        )?.balance ?? 0;
+
+      setState({
+        leaveVacation: { count: ptoBalance },
+        leaveSick: { count: sickBalance },
+      });
+
+    }).catch((err) => {
+      console.log("Err")
+    }).finally(() => setHandle({ isLoading: false, refreshing: false }));;
+
+
+
   },
 
   SingleApprovals: async (
@@ -1094,10 +1131,8 @@ export const useFetch = {
 
     state.data.forEach((item: SchemaRequestApplications) => {
       if (item.isChecked) {
-        console.log('Iteem', item);
         const dateParse = Utils.panelBatchDateParse(state.selectedButton, item);
 
-        console.log('Batchh', dateParse);
         const generatedEditLog = Utils.generateHistoryItem(
           state.batchReason || '',
           employeeName || '',
@@ -1223,13 +1258,13 @@ export const useFetch = {
 
         res.length > 0
           ? setState({
-              clockIn: res[0],
-              clockOut: res.length > 1 ? res[res.length - 1] : ValuesSchemaCalendarEntries,
-            })
+            clockIn: res[0],
+            clockOut: res.length > 1 ? res[res.length - 1] : ValuesSchemaCalendarEntries,
+          })
           : setState({
-              clockIn: ValuesSchemaCalendarEntries,
-              clockOut: ValuesSchemaCalendarEntries,
-            });
+            clockIn: ValuesSchemaCalendarEntries,
+            clockOut: ValuesSchemaCalendarEntries,
+          });
       })
       .catch(async (error: TypeError) => {
         await UtilsFetch.catchEvent({
@@ -1262,16 +1297,17 @@ export const useFetch = {
       const response = await UtilsFetch.connect(
         APIMethods.GET,
         ContentTypes.JSON,
-        `${process.env.EXPO_PUBLIC_PROFILE_PERSONAL}`,
+        `${process.env.EXPO_PUBLIC_PROFILE}`,
       );
       const photoString = response.data.personalInformation?.photo; // This is the stringified object
       if (!!photoString) {
         const photo = JSON.parse(photoString); // Parse the string into an object
-        const pic = `${process.env.EXPO_PUBLIC_REQUEST}/Uploads/Profile/` + photo.path;
+        const pic = `${process.env.EXPO_PUBLIC_REQUEST}/Uploads/EE/` + photo.path;
         setState({ uri: pic });
       }
+      const fullName = Utils.formatNameHistory(response.data.personalInformation?.name);
       let personalData = {
-        FullName: response.data.personalInformation?.name?.normalName ?? '',
+        FullName: fullName ?? '',
         Name_Department: response.data.recordInformation?.workInformation?.company?.department?.name ?? '',
         Code: response.data.code ?? '',
         Name_Company: response.data.recordInformation?.workInformation?.company?.name ?? '',

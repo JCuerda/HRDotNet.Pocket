@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { COLORS, STYLES } from 'src';
 import { PropsPageHeader } from 'src/types/Types';
 
-const PageHeader: React.FC<PropsPageHeader> = ({ name }) => {
+const PageHeader: React.FC<PropsPageHeader> = ({ name, customNavigate }) => {
   const [isDisabled, setDisabled] = useState(false);
   const navigation = useNavigation();
 
@@ -20,7 +20,12 @@ const PageHeader: React.FC<PropsPageHeader> = ({ name }) => {
 
   const onBackHandler = () => {
     setDisabled(true);
-    navigation.goBack();
+
+    if (customNavigate) {
+      customNavigate();
+    } else {
+      navigation.goBack();
+    }
   };
 
   return (

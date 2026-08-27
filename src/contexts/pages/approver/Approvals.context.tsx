@@ -43,28 +43,28 @@ type TypeContext = {
 export const Context = createContext<TypeContext>({
   params: undefined,
   state: ValuesApprovals.State,
-  setState: () => {},
+  setState: () => { },
   handle: ValuesApprovals.Handle,
-  setHandle: () => {},
+  setHandle: () => { },
 
-  onHandleCheckbox: () => {},
-  onHandleSelectAll: () => {},
-  onHandleApprovals: () => {},
-  onHandleClosePrompt: () => {},
-  onHandleCancelPrompt: () => {},
-  onHandleApprovePrompt: () => {},
-  onHandlePress: () => {},
-  onHandleRefreshControl: () => {},
-  onHandleSetReachedEnd: () => {},
-  onHandleSetURLApproval: () => {},
-  onHandleFetchApproval: () => {},
+  onHandleCheckbox: () => { },
+  onHandleSelectAll: () => { },
+  onHandleApprovals: () => { },
+  onHandleClosePrompt: () => { },
+  onHandleCancelPrompt: () => { },
+  onHandleApprovePrompt: () => { },
+  onHandlePress: () => { },
+  onHandleRefreshControl: () => { },
+  onHandleSetReachedEnd: () => { },
+  onHandleSetURLApproval: () => { },
+  onHandleFetchApproval: () => { },
   isSelectable: () => false,
 });
 
 export const CtxApprovals = ({ children }: { children: React.ReactNode }) => {
   const navigation: TypeNavStack['navigation'] = useNavigation();
   const params = useRoute().params as ParamsRequestApplication;
-  const { cutOffPeriod, employeeName } = useGlobalStore();
+  const { cutOffPeriod, employeeName, setApprovalCounts } = useGlobalStore();
 
   const removeDashFrom = DateTimeUtils.getRemoveDash(cutOffPeriod[0] || '');
   const removeDashTo = DateTimeUtils.getRemoveDash(cutOffPeriod[1] || '');
@@ -126,9 +126,9 @@ export const CtxApprovals = ({ children }: { children: React.ReactNode }) => {
     state.failedList!.length <= 0 || state.successList!.length > 0
       ? setHandle({ refreshing: !handle.refreshing, isLoading: true })
       : setState({
-          successList: [],
-          failedList: [],
-        });
+        successList: [],
+        failedList: [],
+      });
   };
 
   const onHandleApprovePrompt = async () => {
@@ -156,7 +156,7 @@ export const CtxApprovals = ({ children }: { children: React.ReactNode }) => {
 
   const onHandleSetURLApproval = () => {
     const field = [2, 3, 5].includes(state.selectedButton) ? STRINGS.filterDateFiled : STRINGS.filterDateFrom;
-    setHandle({ isLoading: true, isLoadMore: true, isWaiting: true });
+    setHandle({ isLoadMore: true, isWaiting: true });
     setState({
       filterType: field,
       filterValue: `${removeDashFrom} - ${removeDashTo}`,
@@ -165,6 +165,7 @@ export const CtxApprovals = ({ children }: { children: React.ReactNode }) => {
       data: [],
       page: 1,
       count: 0,
+      fetchKey: String(Date.now()),
     });
   };
 
@@ -172,6 +173,8 @@ export const CtxApprovals = ({ children }: { children: React.ReactNode }) => {
     if (state.urlQuery !== '') {
       const interval = setTimeout(async () => {
         await useFetch.Approvals(navigation, state, setState, handle, setHandle);
+        const counts = await useFetch.ApprovalsCounts(ValuesApprovals.State.buttons.length, removeDashFrom, removeDashTo);
+        setApprovalCounts(counts);
       }, 50);
       return () => {
         setHandle({ isLoading: false });

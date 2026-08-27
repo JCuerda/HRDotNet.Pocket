@@ -6,6 +6,8 @@
  */
 
 import React, { createContext } from 'react';
+import PendingIconText from 'src/components/use/PendingIconText';
+import { STRINGS } from 'src/constants/Strings';
 import { useFetchPending } from 'src/hooks/usePending';
 import { PendingHandles, PendingStates, PendingValues } from 'src/types/Pending';
 
@@ -19,19 +21,22 @@ type TypeContext = {
   onFetchPending: () => void;
   onHandleRefreshControl: () => void;
   onHandleSetReachedEnd: () => void;
+  onHandleClear: () => void;
   onHandleSearchSubmit: (index: number, value: string, fromDate: string, toDate: string) => void;
 };
 
 export const Context = createContext<TypeContext>({
   state: PendingValues.State,
-  setState: () => {},
+  setState: () => { },
   handle: PendingValues.Handle,
-  setHandle: () => {},
-  onHandlePress: () => {},
-  onFetchPending: () => {},
-  onHandleRefreshControl: () => {},
-  onHandleSetReachedEnd: () => {},
-  onHandleSearchSubmit: () => {},
+  setHandle: () => { },
+  onHandlePress: () => { },
+  onFetchPending: () => { },
+  onHandleRefreshControl: () => { },
+  onHandleSetReachedEnd: () => { },
+  onHandleSearchSubmit: () => { },
+  onHandleClear: () => { },
+
 });
 
 export const CtxPendings = ({ children }: { children: React.ReactNode }) => {
@@ -73,14 +78,39 @@ export const CtxPendings = ({ children }: { children: React.ReactNode }) => {
     return () => clearTimeout(interval);
   };
 
-  const onHandleSearchSubmit = (index?: number, value?: string, fromDate?: string, toDate?: string) => {
+  const onHandleClear = () => {
+    setState({
+      filterText: '',
+      searchFilterIndex: 0,
+      fromDate: '',
+      toDate: '',
+      filterLabel: ''
+    })
+  }
+
+  const onHandleSearchSubmit = (
+    index?: number,
+    value?: string,
+    fromDate?: string,
+    toDate?: string
+  ) => {
+    const titleLabel = STRINGS.pendingTitleFilter(index || 0);
+    const filterValue = value
+      ? STRINGS.pendingValueFilter(value)
+      : `${fromDate || ''} - ${toDate || ''}`;
+
     setState({
       searchFilterIndex: index,
       filterText: value,
-      fromDate: fromDate,
-      toDate: toDate,
+      fromDate,
+      toDate,
+      filterLabel:
+        !value && !fromDate && !toDate
+          ? ''
+          : `${titleLabel ? `${titleLabel}: ${filterValue}` : ''}`,
     });
   };
+
 
   return (
     <Context.Provider
@@ -89,7 +119,7 @@ export const CtxPendings = ({ children }: { children: React.ReactNode }) => {
         setState,
         handle,
         setHandle,
-
+        onHandleClear,
         onHandleRefreshControl,
         onHandleSetReachedEnd,
         onHandlePress,

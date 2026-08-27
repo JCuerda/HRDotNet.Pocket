@@ -9,7 +9,7 @@ import { Shadow } from 'react-native-shadow-2'
 import SlideButton from 'rn-slide-button';
 import * as Location from 'expo-location';
 import { useRoute } from '@react-navigation/native';
-import { FontAwesome } from '@expo/vector-icons'; 
+import { FontAwesome } from '@expo/vector-icons';
 
 import PageHeader from 'src/components/header/PageHeader';
 import SuccessTimeClock from 'src/components/prompt/SuccessTimeClock';
@@ -21,7 +21,7 @@ import { Utils } from 'src/utils/Utils';
 import { ValuesClockInOut } from 'src/constants/Values';
 import { StateClockInOut, TypeHandle, TypeNavProp } from 'src/types/Types';
 import { COLORS, STRINGS, STYLES, DateTimeUtils, ERRORS } from 'src';
-import SwipeButton from 'rn-swipe-button'; 
+import SwipeButton from 'rn-swipe-button';
 import TimeDisplay from 'src/components/button/TimeDisplay';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -32,19 +32,19 @@ const ClockInOut: React.FC<TypeNavProp> = ({ navigation }) => {
     const [error, setError] = useState<string | null>(null);
 
     const [state, setState] = useReducer(
-        (state: StateClockInOut, newState: Partial<StateClockInOut>) => ({ ...state, ...newState }), 
-            ValuesClockInOut(params).State
+        (state: StateClockInOut, newState: Partial<StateClockInOut>) => ({ ...state, ...newState }),
+        ValuesClockInOut(params).State
     )
 
     const [handle, setHandle] = useReducer(
-        (state: TypeHandle, newState: Partial<TypeHandle>) => ({ ...state, ...newState }), 
-            ValuesClockInOut(params).Handle
+        (state: TypeHandle, newState: Partial<TypeHandle>) => ({ ...state, ...newState }),
+        ValuesClockInOut(params).Handle
     )
 
     const onCloseSuccessPrompt = async () => {
         setHandle({ isSuccess: false })
         navigation.navigate(STRINGS.pathTabStack, { screen: STRINGS.pathTabHome, refresh: true })
-    }  
+    }
 
     const onRefresh = useCallback(() => {
         setHandle({ isRestart: true })
@@ -59,11 +59,11 @@ const ClockInOut: React.FC<TypeNavProp> = ({ navigation }) => {
                 ERRORS.permissionTitle,
                 ERRORS.permissionLocation,
                 () => {
-                    navigation.navigate(STRINGS.pathTabStack, { 
+                    navigation.navigate(STRINGS.pathTabStack, {
                         screen: STRINGS.pathTabHome,
                         params: { refresh: true }
                     })
-                
+
                     Linking.openSettings()
                 }
             )
@@ -71,7 +71,7 @@ const ClockInOut: React.FC<TypeNavProp> = ({ navigation }) => {
             Utils.getLocationClocked(state, setState)
         }
     }, [state.location, handle.isRestart])
-    
+
     const onRefreshHandle = () => {
         setState({ location: '' })
         onGetLocation()
@@ -81,7 +81,7 @@ const ClockInOut: React.FC<TypeNavProp> = ({ navigation }) => {
         try {
             setHandle({ isLoading: true })
             await useFetch.ClockInOut(state, setState, setHandle)
-        } catch(error: unknown) {
+        } catch (error: unknown) {
             alert(error)
         } finally {
             setHandle({ isLoading: false })
@@ -89,7 +89,7 @@ const ClockInOut: React.FC<TypeNavProp> = ({ navigation }) => {
     }
 
 
-    useEffect(() => { 
+    useEffect(() => {
         onGetLocation()
     }, [state.geofences, handle.isRestart])
 
@@ -97,20 +97,20 @@ const ClockInOut: React.FC<TypeNavProp> = ({ navigation }) => {
         const fetchRadius = async () => {
             try {
                 const radius = await useFetch.TimeClockRadius(`${process.env.EXPO_PUBLIC_TIME_CLOCK_RADIUS}`);
-                setRadiusData(radius); 
+                setRadiusData(radius);
                 const existingData = await AsyncStorage.getItem('ClockedData');
-    
+
                 existingData === null
-                ? await AsyncStorage.setItem('ClockedData', JSON.stringify(state))
-                : await AsyncStorage.mergeItem('ClockedData', JSON.stringify(state));
+                    ? await AsyncStorage.setItem('ClockedData', JSON.stringify(state))
+                    : await AsyncStorage.mergeItem('ClockedData', JSON.stringify(state));
             } catch (error) {
                 setError('Error fetching radius');
             }
         };
-    
-        fetchRadius(); 
-    
-        }, [state.clockedData]);
+
+        fetchRadius();
+
+    }, [state.clockedData]);
 
 
     return (
@@ -123,7 +123,7 @@ const ClockInOut: React.FC<TypeNavProp> = ({ navigation }) => {
 
             {handle.isLoading && (<Loader />)}
 
-            {state.location  ? (
+            {state.location ? (
                 <View style={styles.container}>
                     <MapView
                         style={styles.map}
@@ -137,31 +137,31 @@ const ClockInOut: React.FC<TypeNavProp> = ({ navigation }) => {
                         userLocationUpdateInterval={10}
                         renderToHardwareTextureAndroid
                     >
-            
-                    <Marker coordinate={state.location as LatLng} />
-                    
+
+                        <Marker coordinate={state.location as LatLng} />
+
                         {state.geofences && state.geofences?.map((
-                            geofence : {
-                                latitude : number
-                                longitude : number
-                                radius : number
-                            }, 
-                            index : number
+                            geofence: {
+                                latitude: number
+                                longitude: number
+                                radius: number
+                            },
+                            index: number
                         ) => (
                             <Circle
                                 key={index}
-                                center={{ 
-                                    latitude: geofence.latitude, 
-                                    longitude: geofence.longitude 
+                                center={{
+                                    latitude: geofence.latitude,
+                                    longitude: geofence.longitude
                                 }}
                                 radius={radiusData!}
                                 strokeWidth={2}
                                 strokeColor={
-                                    state.isInside && 
+                                    state.isInside &&
                                         state?.isInside[index] ? COLORS.opaqueGreen : COLORS.opaqueRed
                                 }
                                 fillColor={
-                                    state.isInside && 
+                                    state.isInside &&
                                         state?.isInside[index] ? COLORS.opaqueGreen : COLORS.opaqueRed
                                 }
                             />
@@ -184,10 +184,10 @@ const ClockInOut: React.FC<TypeNavProp> = ({ navigation }) => {
                             <TimeDisplay />
                         </View>
 
-                       
-                         <SwipeButton
+
+                        <SwipeButton
                             height={60}
-                            swipeSuccessThreshold={80} 
+                            swipeSuccessThreshold={80}
                             shouldResetAfterSuccess={true}
                             title={STRINGS.slideClock(state.status)}
                             titleFontSize={16}
@@ -197,7 +197,7 @@ const ClockInOut: React.FC<TypeNavProp> = ({ navigation }) => {
                             }}
                             containerStyles={{
                                 backgroundColor:
-                                params.value === 0 ? COLORS.lighterOrange : COLORS.powderBlue
+                                    params.value === 0 ? COLORS.lighterOrange : COLORS.powderBlue
                             }}
                             railBackgroundColor={
                                 params.value === 0 ? COLORS.orange : COLORS.blue
@@ -207,35 +207,35 @@ const ClockInOut: React.FC<TypeNavProp> = ({ navigation }) => {
                                 state.isInside &&
                                 !state.isInside.some((inside: boolean) => inside)
                             }
-                            disabledRailBackgroundColor = "#fdbb98ff"
-                            disabledThumbIconBackgroundColor = "#fdbb98ff"
+                            disabledRailBackgroundColor="#fdbb98ff"
+                            disabledThumbIconBackgroundColor="#fdbb98ff"
                             onSwipeSuccess={onPressClocked}
-                            />
+                        />
 
                     </Shadow>
-                   
+
                 </View>
-                
+
             ) : (
                 <RefreshPage
                     onRefresh={onRefresh}
                     refreshing={handle.refreshing!}
                     text={STRINGS.fetchLocation}
-                    showText={STRINGS.slideLoad} 
+                    showText={STRINGS.slideLoad}
                 />
             )}
 
             {
                 handle.isSuccess && <>
-                <SuccessTimeClock
-                state={state}
-                visible={true}
-                onCloseSuccessPrompt={onCloseSuccessPrompt}
-            />
+                    <SuccessTimeClock
+                        state={state}
+                        visible={true}
+                        onCloseSuccessPrompt={onCloseSuccessPrompt}
+                    />
                 </>
             }
 
-       
+
         </React.Fragment>
     )
 }

@@ -77,7 +77,7 @@ export const RndrRequest = () => {
 export const RndrApprovals = () => {
   return (
     <CtxApprovals>
-      <Approvals />
+      <Approvals navigation={useNavigation()} />
     </CtxApprovals>
   );
 };
@@ -85,7 +85,7 @@ export const RndrApprovals = () => {
 export const RndrReviewals = () => {
   return (
     <CtxReviewals>
-      <Reviewals />
+      <Reviewals navigation={useNavigation()} />
     </CtxReviewals>
   );
 };

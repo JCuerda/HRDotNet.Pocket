@@ -21,10 +21,11 @@ import {
 } from 'src/types/Types';
 import { ValuesRequestDetails, ValuesRequestSummary } from 'src/constants/Values';
 import { useGlobalStore } from 'src/store/GlobalStore';
+import { CancelActionFrom } from 'src/constants/Enum';
 
 const RequestSummary: React.FC<TypeNavStack> = ({ navigation }) => {
   const [onReqAction] = useState<TypeReqAction[]>(ARRAY.reqAction)[0];
-  const { employeeName } = useGlobalStore();
+  const { employeeName, cancelActionFrom, setSelectedApplicationTab, selectedApplicationTab } = useGlobalStore();
 
   const params = useRoute().params as {
     onPanel?: number;
@@ -50,15 +51,49 @@ const RequestSummary: React.FC<TypeNavStack> = ({ navigation }) => {
   const currProps = params.props as PropsRequestSummary; // Form values state
   const currUpdateProps = params.data as SchemaRequestApplications;
 
+
   const onHandleClosePrompt = () => {
     setHandle({ isSuccess: false });
-    navigation.navigate(STRINGS.pathTabStack, { screen: STRINGS.tabTitleRequest, params: { refresh: true } });
+
+    let destination: string | undefined;
+
+    switch (params.onReqAction) {
+      case onReqAction.Review:
+        destination = STRINGS.pathReviewals;
+        break;
+
+      case onReqAction.Approve:
+        destination = STRINGS.pathApprovals;
+        break;
+
+      case onReqAction.Cancel:
+        if (cancelActionFrom === CancelActionFrom.Review) {
+          destination = STRINGS.pathReviewals;
+        } else if (cancelActionFrom === CancelActionFrom.Approve) {
+          destination = STRINGS.pathApprovals;
+        } else {
+          destination = undefined;
+        }
+        break;
+    }
+
+    if (destination) {
+      navigation.navigate(destination, {
+        refresh: true,
+      });
+    } else {
+      navigation.navigate(STRINGS.pathTabStack, {
+        screen: STRINGS.pathTabRequest,
+        params: { refresh: true },
+      });
+    }
   };
 
   const onHandleSubmit = () => {
     (async () => {
       try {
         setHandle({ isLoading: true });
+        setSelectedApplicationTab(currPanel)
         if (onReqAction.Review === params.onReqAction) {
           await useFetch.NewSingleReviews(
             navigation,

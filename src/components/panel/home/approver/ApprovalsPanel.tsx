@@ -80,7 +80,7 @@ const ApprovalsPanel: React.FC = () => {
   const ListFooterComponent = () => {
     return (
       <React.Fragment>
-        {state.data.length <= 0 && !handle.isLoading && <Note text={STRINGS.nothingFound} icon="magnifying-glass" />}
+        {state.data.length <= 0 && !handle.isLoading && !handle.isWaiting && <Note text={STRINGS.nothingFound} icon="magnifying-glass" />}
 
         {handle.isWaiting && (
           <View style={styles.loader}>

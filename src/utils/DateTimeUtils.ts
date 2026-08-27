@@ -146,6 +146,13 @@ export const DateTimeUtils = {
   dateSubtractOneToDash: () => dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
   dateAddOneToDash: () => dayjs().add(1, 'day').format('YYYY-MM-DD'),
 
+  formatToDefaultDate: (date: string) => {
+    if (!date) {
+      return new Date();
+    }
+    return dayjs(date, 'MMM DD, YYYY').toDate();
+  },
+
   checkIsoNullValue: (date: string) => date === '0001-01-01T00:00:00',
 
   getIsoDateWord: (date: string) => dayjs(date).format(DateTimeFormat.HalfMonthWord),

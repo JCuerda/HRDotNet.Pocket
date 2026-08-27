@@ -7,11 +7,13 @@
 //--- React Modules
 //--- Own Modules
 import { APIMethods, ContentTypes } from 'src/constants/Values';
+import { TypeError } from 'src/types/Types';
 import { UtilsFetch } from 'src/utils/UtilsFetch';
 //--- Types
 import { StateHome } from 'src/types/Types';
 import { DocStatus, PendingApplications, PendingData, PendingHandles, PendingStates } from 'src/types/Pending';
 import { DateTimeUtils } from 'src/utils/DateTimeUtils';
+import { ERRORS } from 'src/constants/Errors';
 
 export const useFetchPending = {
   Pending: async (
@@ -27,6 +29,8 @@ export const useFetchPending = {
     await UtilsFetch.connect(APIMethods.GET, ContentTypes.JSON, `${process.env.EXPO_PUBLIC_PENDING}`)
       .then((response: { data: PendingData }) => {
         const pendingApplicationsData = response.data.pendingApplications;
+
+        // console.log("pEEED", pendingApplicationsData)
 
         const pendingApplications = Array.isArray(pendingApplicationsData)
           ? pendingApplicationsData
@@ -63,8 +67,8 @@ export const useFetchPending = {
         } else if (state.searchFilterIndex === 2) {
           searchApplications = filteredApplications.filter((applications: PendingApplications) => {
             const dateTransaction = new Date(applications.dateTransaction);
-            const fromDate = new Date(DateTimeUtils.dateToDefault(state.fromDate));
-            const toDate = new Date(DateTimeUtils.dateToDefault(state.toDate));
+            const fromDate = new Date(DateTimeUtils.formatToDefaultDate(state.fromDate));
+            const toDate = new Date(DateTimeUtils.formatToDefaultDate(state.toDate));
             if (!state.fromDate && !state.toDate) {
               return true;
             } else {
@@ -91,8 +95,8 @@ export const useFetchPending = {
           searchApplications = filteredApplications.filter((applications: PendingApplications) => {
             const dateFrom = new Date(applications.dateRange.dateFrom);
             const dateTo = new Date(applications.dateRange.dateTo);
-            const fromDate = new Date(DateTimeUtils.dateToDefault(state.fromDate));
-            const toDate = new Date(DateTimeUtils.dateToDefault(state.toDate));
+            const fromDate = new Date(DateTimeUtils.formatToDefaultDate(state.fromDate));
+            const toDate = new Date(DateTimeUtils.formatToDefaultDate(state.toDate));
 
             if (!state.fromDate && !state.toDate) {
               return true;
@@ -114,6 +118,17 @@ export const useFetchPending = {
       })
       .catch(async (error: TypeError) => {
         console.error(error);
+        const errors = await UtilsFetch.catchErrors(error);
+        await UtilsFetch.catchEvent({
+          error: error,
+          setHandle: setHandle,
+          toastSet: errors.code === 0 ? 0 : 1,
+          toastMessage: UtilsFetch.requestError(
+            errors.code,
+            errors.parsed,
+            UtilsFetch.handleErrorException(errors.response, ERRORS.appFilingException),
+          ),
+        });
       })
       .finally(() => setHandle({ isLoading: false }));
   },
@@ -128,6 +143,6 @@ export const useFetchPending = {
       .catch(async (error: TypeError) => {
         console.error('Error fetching pending badge:', error);
       })
-      .finally(() => {});
+      .finally(() => { });
   },
 };

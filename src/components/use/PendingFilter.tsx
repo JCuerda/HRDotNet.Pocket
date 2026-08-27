@@ -6,7 +6,7 @@
  */
 
 //--- React Modules
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import DateTimePicker from 'react-native-modal-datetime-picker';
@@ -18,13 +18,16 @@ import { COLORS } from 'src/constants/Colors';
 import { STRINGS } from 'src/constants/Strings';
 import { STYLES } from 'src/constants/styles/Styles';
 import { usePending } from 'src/contexts/pages';
+import { PendingStates } from 'src/types/Pending';
 
 const PendingFilter = ({
   visible,
+  state,
   close,
   onHandleSearchSubmit,
 }: {
   visible: boolean;
+  state: PendingStates;
   close: () => void;
   onHandleSearchSubmit: (index?: number, value?: string, fromDate?: string, toDate?: string) => void;
 }) => {
@@ -40,9 +43,11 @@ const PendingFilter = ({
     { label: 'Work Date', value: 4 },
   ]);
 
+  const [selectedApplication, setSelectedApplication] = useState('')
   const [searchText, setSearchText] = React.useState<string>('');
   const [fromDate, setFromDate] = React.useState<string>('');
   const [toDate, setToDate] = React.useState<string>('');
+
   const [isVisibleFrom, setIsVisibleFrom] = React.useState<boolean>(false);
   const [isVisibleTo, setIsVisibleTo] = React.useState<boolean>(false);
 
@@ -67,10 +72,10 @@ const PendingFilter = ({
           <View style={[styles.row, { paddingHorizontal: 20 }]}>
             <DropDownPicker
               open={show}
-              value={searchText}
+              value={selectedApplication}
               items={filing as React.ComponentProps<typeof DropDownPicker>['items']}
               setOpen={setShow}
-              setValue={setSearchText}
+              setValue={setSelectedApplication}
               setItems={setFiling}
               modalAnimationType="fade"
               maxHeight={200}
@@ -93,7 +98,7 @@ const PendingFilter = ({
                   onChangeText={(text) => setSearchText(text)}
                   editable={false}
                   placeholderTextColor="black"
-                  style={{ fontSize: 14, paddingHorizontal: 15, borderWidth: 1, borderRadius: 20, paddingVertical: 5, flexShrink: 1,  flexWrap: "wrap" }}
+                  style={{ fontSize: 14, paddingHorizontal: 15, borderWidth: 1, borderRadius: 20, paddingVertical: 5, flexShrink: 1, flexWrap: "wrap" }}
                   onTouchStart={() => setIsVisibleFrom(true)}
                 />
                 <DateTimePicker
@@ -101,9 +106,10 @@ const PendingFilter = ({
                   mode="date"
                   textColor="black"
                   accentColor={COLORS.powderBlue}
-                  date={getDate()}
+                  date={fromDate ? DateTimeUtils.formatToDefaultDate(fromDate) : getDate()}
                   onConfirm={(date) => {
                     setFromDate(DateTimeUtils.dateDefaultToWord(date.toISOString()));
+                    setToDate("")
                     setIsVisibleFrom(false);
                   }}
                   onCancel={() => setIsVisibleFrom(false)}
@@ -116,7 +122,7 @@ const PendingFilter = ({
                   onChangeText={(text) => setSearchText(text)}
                   editable={false}
                   placeholderTextColor="black"
-                  style={{ fontSize: 14, paddingHorizontal: 15, borderWidth: 1, borderRadius: 20, paddingVertical: 5, flexShrink: 1, flexWrap: "wrap"}}
+                  style={{ fontSize: 14, paddingHorizontal: 15, borderWidth: 1, borderRadius: 20, paddingVertical: 5, flexShrink: 1, flexWrap: "wrap" }}
                   onTouchStart={() => setIsVisibleTo(true)}
                 />
                 <DateTimePicker
@@ -124,7 +130,8 @@ const PendingFilter = ({
                   mode="date"
                   textColor="black"
                   accentColor={COLORS.powderBlue}
-                  date={getDate()}
+                  date={toDate ? DateTimeUtils.formatToDefaultDate(toDate) : getDate()}
+                  minimumDate={DateTimeUtils.formatToDefaultDate(fromDate)}
                   onConfirm={(date) => {
                     setToDate(DateTimeUtils.dateDefaultToWord(date.toISOString()));
                     setIsVisibleTo(false);
@@ -136,6 +143,7 @@ const PendingFilter = ({
           </View>
         );
       case 3:
+
         return (
           <View style={[styles.row, { paddingHorizontal: 20 }]}>
             <FontAwesome name="search" size={20} color={COLORS.orange} />
@@ -169,6 +177,7 @@ const PendingFilter = ({
                   date={getDate()}
                   onConfirm={(date) => {
                     setFromDate(DateTimeUtils.dateDefaultToWord(date.toISOString()));
+                    setToDate("")
                     setIsVisibleFrom(false);
                   }}
                   onCancel={() => setIsVisibleFrom(false)}
@@ -189,7 +198,8 @@ const PendingFilter = ({
                   mode="date"
                   textColor="black"
                   accentColor={COLORS.powderBlue}
-                  date={getDate()}
+                  date={toDate ? DateTimeUtils.formatToDefaultDate(toDate) : getDate()}
+                  minimumDate={DateTimeUtils.formatToDefaultDate(fromDate)}
                   onConfirm={(date) => {
                     setToDate(DateTimeUtils.dateDefaultToWord(date.toISOString()));
                     setIsVisibleTo(false);
@@ -205,6 +215,36 @@ const PendingFilter = ({
     }
   };
 
+  useEffect(() => {
+    if (visible) {
+      if (state?.filterLabel?.includes("Application Type")) {
+        setValue(1)
+        const valueFiling = filing.find(
+          item => item.value.trim() === state?.filterText?.trim()
+        )?.value;
+        setSearchText(valueFiling || "")
+      } else if (state?.filterLabel?.includes("Date")) {
+
+        if (state?.filterLabel?.includes("Transaction Date")) {
+          setValue(2)
+        } else if (state?.filterLabel?.includes("Work Date")) {
+          setValue(4)
+        }
+
+        setFromDate(state.fromDate)
+        setToDate(state.toDate)
+      } else if (state?.filterLabel?.includes("Document")) {
+        setValue(3)
+        setSearchText(state.filterText)
+      } else {
+        setValue(0)
+        setSearchText('')
+        setFromDate('')
+        setToDate('')
+      }
+    }
+  }, [visible])
+
   return (
     <React.Fragment>
       <Modal
@@ -218,53 +258,60 @@ const PendingFilter = ({
           <View style={styles.modalWrapper}>
             <FontAwesome name="close" size={20} color={COLORS.lighterGray} onPress={close} style={styles.closeButton} />
 
-            <View style = {{paddingHorizontal: 20}}>
-                   <DropDownPicker
-                          open={open}
-                          value={value}
-                          items={items as React.ComponentProps<typeof DropDownPicker>['items']}
-                          setOpen={setOpen}
-                          setValue={setValue}
-                          setItems={setItems}
-                          modalAnimationType="fade"
-                          maxHeight={200}
-                          style={styles.dropdown}
-                          textStyle={{ fontFamily: 'Inter_400Regular' }}
-                          placeholderStyle={{ color: COLORS.lighterGray }}
-                          placeholder={STRINGS.placeholderFilter}
-                        />
+            <View style={{ paddingHorizontal: 20 }}>
+              <DropDownPicker
+                open={open}
+                value={value}
+                items={items as React.ComponentProps<typeof DropDownPicker>['items']}
+                setOpen={setOpen}
+                setValue={setValue}
+                setItems={setItems}
+                modalAnimationType="fade"
+                maxHeight={200}
+                style={styles.dropdown}
+                textStyle={{ fontFamily: 'Inter_400Regular' }}
+                placeholderStyle={{ color: COLORS.lighterGray }}
+                placeholder={STRINGS.placeholderFilter}
+              />
             </View>
-       
+
 
             {renderContent()}
             <View style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
-              {searchText || (fromDate && toDate) ? (
-                <TouchableOpacity
-                  onPress={() => {
-                    setValue(0);
-                    setSearchText('');
-                    setState({
-                      filterText: '',
-                      fromDate: '',
-                      toDate: '',
-                    });
-                    setFromDate('');
-                    setToDate('');
-                  }}
-                  style={styles.borderButton}
-                >
-                  <Text style={styles.borderButtonText}>Clear</Text>
-                </TouchableOpacity>
-              ) : null}
+
+              <TouchableOpacity
+                onPress={() => {
+                  setValue(0);
+                  setSearchText('');
+                  // setState({
+                  //   filterText: '',
+                  //   fromDate: '',
+                  //   toDate: '',
+                  // });
+                  setFromDate('');
+                  setToDate('');
+
+                }}
+                style={styles.borderButton}
+              >
+                <Text style={styles.borderButtonText}>Clear</Text>
+              </TouchableOpacity>
+
               <Pressable
                 onPress={() => {
-                  onHandleSearchSubmit(value ?? 0, searchText, fromDate, toDate);
+                  if (value == 1 || value == 3) {
+                    const valueToUse = value === 1 ? selectedApplication : searchText
+                    onHandleSearchSubmit(value ?? 0, valueToUse, '', '');
+                  } else if (value == 2 || value == 4) {
+                    onHandleSearchSubmit(value ?? 0, '', fromDate, toDate);
+                  } else {
+                    onHandleSearchSubmit(0, '', '', '');
+                  }
                   close();
                 }}
-                style={!searchText && !fromDate && !toDate ? styles.disabledButton : styles.button}
-                disabled={!searchText && !fromDate && !toDate}
+                style={styles.button}
               >
-                <Text style={!searchText && !fromDate && !toDate ? styles.disabledButtonText : styles.buttonText}>
+                <Text style={styles.buttonText}>
                   {STRINGS.filter}
                 </Text>
               </Pressable>

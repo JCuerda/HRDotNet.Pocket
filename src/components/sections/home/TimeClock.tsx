@@ -48,9 +48,9 @@ const TimeClock: React.FC = () => {
           : STRINGS.noLogs}
       </Text>}
 
-      <View // ToucableOpacity dapat 
+      <TouchableOpacity
         style={styles.linkButton}
-      //onPress={() => navigation.navigate(STRINGS.pathClockInOut, state.clocked)}
+        onPress={() => navigation.navigate(STRINGS.pathClockInOut, state.clocked)}
       // onPress={() => alert('Geolocation Subscription Setup Required. Please contact your Service Provider for Assistance.')}
       >
 
@@ -59,7 +59,7 @@ const TimeClock: React.FC = () => {
 
           <Text style={styles.timeInOutText}>{state.clocked.nextStatus || STRINGS.clockIn}</Text>
         </Shadow>
-      </View>
+      </TouchableOpacity>
     </View>
   );
 };

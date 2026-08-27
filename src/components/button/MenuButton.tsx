@@ -23,7 +23,7 @@ const MenuButton: React.FC<PropsMenuButton> = ({ show }) => {
 
   const navigation = useNavigation();
   const { state, checkTeamMembers } = useHome();
-  const { reviewalCounts, approvalCounts, cutOffPeriod } = useGlobalStore();
+  const { reviewalCounts, approvalCounts, cutOffPeriod, resetSelectedApplicationTab } = useGlobalStore();
 
   const reviewalsTotal = FilingUtils.countEligible(reviewalCounts, cutOffPeriod);
   const approvalsTotal = FilingUtils.countEligible(approvalCounts, cutOffPeriod, [STRINGS.filed, STRINGS.reviewed]);
@@ -58,7 +58,7 @@ const MenuButton: React.FC<PropsMenuButton> = ({ show }) => {
       } else {
         throw new Error('Token Not Found.');
       }
-    } catch (err) {}
+    } catch (err) { }
   })();
 
   // This hook is reponsible for checking if the user
@@ -87,80 +87,94 @@ const MenuButton: React.FC<PropsMenuButton> = ({ show }) => {
         image: ASSETS.iconLoanLedger,
         title: STRINGS.menuBtnTitleII,
       },
+
+    ],
+    secondRow: [
       {
-        navigate: () => navigation.navigate(STRINGS.pathReviewals as never),
+        navigate: () => {
+          navigation.navigate(STRINGS.pathReviewals as never)
+          resetSelectedApplicationTab()
+        },
         badge: reviewalsTotal !== 0 && badge(reviewalsTotal),
         image: ASSETS.iconPending,
         title: STRINGS.menuBtnTitleIII,
         disabled: !reviewer,
       },
-    ],
-    secondRow: [
       {
-        navigate: () => navigation.navigate(STRINGS.pathApprovals as never),
+        navigate: () => {
+          navigation.navigate(STRINGS.pathApprovals as never)
+          resetSelectedApplicationTab()
+        },
         badge: approvalsTotal !== 0 && badge(approvalsTotal),
         image: onShowImage(ASSETS.iconCOSRequest, ASSETS.iconApprovals),
         title: onShowTitle(STRINGS.menuBtnTitleUserI, STRINGS.menuBtnTitleApproverI),
         disabled: !approver,
       },
-      {
-        navigate: () => {
-          if (state.teamMembersCount! > 0) {
-            true && (navigation as any).navigate('TeamMembers', { screen: 'TeamsList' });
-          } else {
-            false && (navigation as any).navigate('TeamMembers', { screen: 'TeamsList' });
-          }
-        },
-        image: onShowImage(ASSETS.iconOBRequest, ASSETS.iconTeams),
-        title: onShowTitle(STRINGS.menuBtnTitleUserII, STRINGS.menuBtnTitleApproverII),
-        //disabled: state.teamMembersCount! <= 0
-        disabled: true,
-      },
-      {
-        navigate: () => (navigation as any).navigate('Contacts', { screen: 'ContactsList' }),
-        image: onShowImage(ASSETS.iconOTRequest, ASSETS.iconContacts),
-        title: onShowTitle(STRINGS.menuBtnTitleUserIII, STRINGS.menuBtnTitleApproverIII),
-        disabled: true,
-      },
+
+      // {
+      //   navigate: () => {
+      //     if (state.teamMembersCount! > 0) {
+      //       true && (navigation as any).navigate('TeamMembers', { screen: 'TeamsList' });
+      //     } else {
+      //       false && (navigation as any).navigate('TeamMembers', { screen: 'TeamsList' });
+      //     }
+      //   },
+      //   image: onShowImage(ASSETS.iconOBRequest, ASSETS.iconTeams),
+      //   title: onShowTitle(STRINGS.menuBtnTitleUserII, STRINGS.menuBtnTitleApproverII),
+      //   //disabled: state.teamMembersCount! <= 0
+      //   disabled: true,
+      // },
+      // {
+      //   navigate: () => (navigation as any).navigate('Contacts', { screen: 'ContactsList' }),
+      //   image: onShowImage(ASSETS.iconOTRequest, ASSETS.iconContacts),
+      //   title: onShowTitle(STRINGS.menuBtnTitleUserIII, STRINGS.menuBtnTitleApproverIII),
+      //   disabled: true,
+      // },
     ],
   };
 
   const commonProps = {
     placeholderContent: Utils.placeholderLoading(currState),
     style: { width: currState.imageSize, height: currState.imageSize },
-    contentFit: 'contain' as const,
   };
+
 
   const DisplayButton = ({ item }: { item: TypeObjectValues }) => {
     return (
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.gridButton, { padding: currState.padding, opacity: item.disabled ? 0.6 : 1 }]}
-          onPress={item.navigate}
-          disabled={item.disabled || false}
+      <TouchableOpacity
+        style={styles.buttonContainer}
+        onPress={item.navigate}
+        disabled={item.disabled || false}
+      >
+        <Shadow
+          offset={[1, 1.2]}
+          distance={2.5}
+          style={[
+            styles.alignWrapper,
+            {
+              height: 70,
+              opacity: item.disabled ? 0.6 : 1,
+            },
+          ]}
         >
           {item.badge && item.badge}
-          <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
-            <View
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: currState.tileSize,
-                height: currState.tileSize,
-                backgroundColor: COLORS.lightestOrange,
-                borderRadius: 12,
-              }}
-            >
-              {item.icon ? item.icon : <Image source={item.image} key={item.title} {...commonProps} />}
-            </View>
-            <Text style={styles.textButton} numberOfLines={2}>
-              {item.title}
-            </Text>
+
+          <Image
+            source={item.image}
+            key={item.title}
+            contentFit="contain"
+            {...commonProps}
+          />
+
+          <View>
+
+            <Text style={styles.title}>{item.title}</Text>
           </View>
-        </TouchableOpacity>
-      </View>
+        </Shadow>
+      </TouchableOpacity>
     );
   };
+
 
   return (
     <View style={styles.container}>
