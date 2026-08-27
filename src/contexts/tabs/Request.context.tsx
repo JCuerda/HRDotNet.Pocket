@@ -16,9 +16,8 @@ type TypeContext = {
   setHandle: React.Dispatch<Partial<TypeHandle>>;
 
   onHandlePress: (index: number) => void;
-  onHandleEffectI: () => void;
-  onHandleEffectII: () => void;
-  onHandleEffectIII: () => void;
+  onHandleFetchRequest: () => void;
+  onHandleInitial: () => void;
 };
 
 export const Context = createContext<TypeContext>({
@@ -28,9 +27,8 @@ export const Context = createContext<TypeContext>({
   setHandle: () => { },
 
   onHandlePress: () => { },
-  onHandleEffectI: () => { },
-  onHandleEffectII: () => { },
-  onHandleEffectIII: () => { },
+  onHandleFetchRequest: () => { },
+  onHandleInitial: () => { },
 });
 
 export const CtxRequest = ({ children }: { children: React.ReactNode }) => {
@@ -51,16 +49,21 @@ export const CtxRequest = ({ children }: { children: React.ReactNode }) => {
     setState({ data: [], selectedButton: index });
   };
 
-  const onHandleEffectI = async () => {
-    setState({ urlQuery: `${process.env.EXPO_PUBLIC_REQUEST_DEFAULTPARAMS}` });
-  };
 
-  const onHandleEffectII = async () => {
-    setState({ data: [], page: 1 });
+  const onHandleInitial = () => {
     setHandle({ isLoadMore: true, isWaiting: true });
-  };
+    setState({
+      filterType: undefined,
+      filterValue: undefined,
+      displayValue: undefined,
+      urlQuery: ``,
+      data: [],
+      page: 1,
+      fetchKey: String(Date.now()),
+    });
+  }
 
-  const onHandleEffectIII = async () => {
+  const onHandleFetchRequest = async () => {
     const interval = setTimeout(async () => {
       try {
         await useFetch.Request(navigation, state, setState, handle, setHandle);
@@ -82,11 +85,9 @@ export const CtxRequest = ({ children }: { children: React.ReactNode }) => {
         setState,
         handle,
         setHandle,
-
         onHandlePress,
-        onHandleEffectI,
-        onHandleEffectII,
-        onHandleEffectIII,
+        onHandleInitial,
+        onHandleFetchRequest
       }}
     >
       {children}

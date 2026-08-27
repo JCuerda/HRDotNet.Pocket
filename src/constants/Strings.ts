@@ -81,7 +81,7 @@ export const STRINGS = {
   pendingButtonII: 'Reviewed',
 
   menuBtnTitleI: 'Timesheet',
-  menuBtnTitleII: 'Loan Ledger',
+  menuBtnTitleII: `Loan${'\n'}Ledger`,
   menuBtnTitleIII: 'Reviewals',
   menuBtnTitleApproverI: 'Approvals',
   menuBtnTitleApproverII: 'Teams',
@@ -552,4 +552,39 @@ export const STRINGS = {
     `<b><u>${count?.toString() + ' ' + request}</u></b> ${STRINGS.approvalsPromptNote(action as number)}`,
   confirmationSelectionReviewal: (count: number, request: string, action: TypeHandle['isAction']) =>
     `<b><u>${count?.toString() + ' ' + request}</u></b> ${STRINGS.reviewalsPrompNote(action as number)}`,
+
+  pendingTitleFilter: (index: number) => {
+    switch (index) {
+      case 1:
+        return "Application Type";
+      case 2:
+        return "Transaction Date";
+      case 3:
+        return "Document No";
+      case 4:
+        return "Work Date";
+      default:
+        return "";
+    }
+  },
+
+  pendingValueFilter: (value: string) => {
+    switch (value) {
+      case "OB":
+        return "Official Business";
+      case "COS":
+        return "Change of Schedule";
+      case "LV":
+        return "Leave";
+      case "ML":
+        return "Missed Log";
+      case "OT":
+        return "Overtime";
+      case "OFF":
+        return "Offset";
+      default:
+        return value;
+    }
+  }
+
 };

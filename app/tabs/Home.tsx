@@ -36,7 +36,6 @@ const Home: React.FC<TypeNavStack> = ({ navigation }) => {
     onHandleEffectI,
     onHandleEffectII,
     fetchUserDetails,
-    checkTeamMembers,
   } = useHome();
   const [employeeLastName, setEmployeeLastName] = useState('');
   const [employeePayrollInfo, setEmployeePayrollInfo] = useState({
@@ -96,17 +95,6 @@ const Home: React.FC<TypeNavStack> = ({ navigation }) => {
     onHandleEffectI;
   }, [params?.refresh!]);
 
-  useEffect(() => {
-    onHandleEffectII();
-  }, [state.loanCount]);
-
-  useEffect(() => {
-    fetchUserDetails();
-  }, []);
-
-  useEffect(() => {
-    checkTeamMembers();
-  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -118,6 +106,7 @@ const Home: React.FC<TypeNavStack> = ({ navigation }) => {
     useCallback(() => {
       RequestCounts.refreshReviewalCounts();
       RequestCounts.refreshApprovalCounts();
+      onHandleEffectII();
     }, []),
   );
 
@@ -131,7 +120,7 @@ const Home: React.FC<TypeNavStack> = ({ navigation }) => {
       } else {
         throw new Error('Token Not Found.');
       }
-    } catch (err) {}
+    } catch (err) { }
   })();
   return (
     <React.Fragment>

@@ -26,10 +26,14 @@ import {
   TypePanel,
   TypeReqAction,
 } from 'src/types/Types';
+import { useGlobalStore } from 'src/store/GlobalStore';
+import { CancelActionFrom } from 'src/constants/Enum';
 
 const ReviewalDetails: React.FC<TypeNavStack> = ({ navigation }) => {
   const [onPanel] = useState<TypePanel[]>(ARRAY.panel)[0];
   const [onReqAction] = useState<TypeReqAction[]>(ARRAY.reqAction)[0];
+
+  const { setCancelActionFrom } = useGlobalStore()
 
   const params = useRoute().params as ParamsRequestDetails;
   const [state, setState] = useReducer(
@@ -92,7 +96,10 @@ const ReviewalDetails: React.FC<TypeNavStack> = ({ navigation }) => {
       <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-around' }}>
         <TouchableOpacity
           style={{ ...styles.button, backgroundColor: COLORS.red }}
-          onPress={() => onRequestHandle(onReqAction.Cancel)}
+          onPress={() => {
+            setCancelActionFrom(CancelActionFrom.Review)
+            onRequestHandle(onReqAction.Cancel)
+          }}
         >
           <Text style={styles.textButton}>{STRINGS.cancel}</Text>
         </TouchableOpacity>

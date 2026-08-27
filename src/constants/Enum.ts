@@ -34,6 +34,11 @@ export enum Others {
   CODE = 'code',
 }
 
+export enum CancelActionFrom {
+  Review = 'Review',
+  Approve = 'Approve'
+}
+
 type FieldLabelsType = {
   [key: number]: {
     [key: string]: string;

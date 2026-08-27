@@ -43,28 +43,28 @@ type TypeContext = {
 export const Context = createContext<TypeContext>({
   params: undefined,
   state: ValuesApprovals.State,
-  setState: () => {},
+  setState: () => { },
   handle: ValuesApprovals.Handle,
-  setHandle: () => {},
+  setHandle: () => { },
 
-  onHandleCheckbox: () => {},
-  onHandleSelectAll: () => {},
-  onHandleApprovals: () => {},
-  onHandleClosePrompt: () => {},
-  onHandleCancelPrompt: () => {},
-  onHandleReviewPrompt: () => {},
-  onHandlePress: () => {},
-  onHandleRefreshControl: () => {},
-  onHandleSetReachedEnd: () => {},
-  onHandleSetURLReviewal: () => {},
-  onHandleFetchReviewal: () => {},
+  onHandleCheckbox: () => { },
+  onHandleSelectAll: () => { },
+  onHandleApprovals: () => { },
+  onHandleClosePrompt: () => { },
+  onHandleCancelPrompt: () => { },
+  onHandleReviewPrompt: () => { },
+  onHandlePress: () => { },
+  onHandleRefreshControl: () => { },
+  onHandleSetReachedEnd: () => { },
+  onHandleSetURLReviewal: () => { },
+  onHandleFetchReviewal: () => { },
   isSelectable: () => false,
 });
 
 export const CtxReviewals = ({ children }: { children: React.ReactNode }) => {
   const navigation: TypeNavStack['navigation'] = useNavigation();
   const params = useRoute().params as ParamsRequestApplication;
-  const { cutOffPeriod, employeeName } = useGlobalStore();
+  const { cutOffPeriod, employeeName, setReviewalCounts } = useGlobalStore();
 
   const removeDashFrom = DateTimeUtils.getRemoveDash(cutOffPeriod[0] || '');
   const removeDashTo = DateTimeUtils.getRemoveDash(cutOffPeriod[1] || '');
@@ -126,9 +126,9 @@ export const CtxReviewals = ({ children }: { children: React.ReactNode }) => {
     state.failedList!.length <= 0 || state.successList!.length > 0
       ? setHandle({ refreshing: !handle.refreshing, isLoading: true })
       : setState({
-          successList: [],
-          failedList: [],
-        });
+        successList: [],
+        failedList: [],
+      });
   };
 
   const onHandleReviewPrompt = async () => {
@@ -172,6 +172,8 @@ export const CtxReviewals = ({ children }: { children: React.ReactNode }) => {
   const onHandleFetchReviewal = async () => {
     if (state.urlQuery !== '') {
       await useFetch.Reviewals(navigation, state, setState, handle, setHandle);
+      const counts = await useFetch.ReviewalsCounts(ValuesApprovals.State.buttons.length, removeDashFrom, removeDashTo);
+      setReviewalCounts(counts);
     }
   };
 

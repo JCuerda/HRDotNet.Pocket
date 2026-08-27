@@ -56,6 +56,7 @@ export const UtilsDisplay = {
     onPress: () => void,
     icon: React.ComponentProps<typeof Ionicons>['name'],
     withAsterisk?: boolean,
+    disabled?: boolean,
   ) => {
     const styles = STYLES.NewRequest;
 
@@ -68,7 +69,7 @@ export const UtilsDisplay = {
           withAsterisk={withAsterisk}
         />
 
-        <View style={[styles.rowView, styles.border]}>
+        <View style={[styles.rowView, disabled ? styles.disabledDate : styles.border]}>
           <StyledText style={styles.text} textStyles={STYLES.StyledText}>
             {value ? convertValue : placeholder}
           </StyledText>
@@ -91,6 +92,7 @@ export const UtilsDisplay = {
     onHandleCheck: (item: CheckboxData, index: number) => void,
     showFieldTitle?: boolean,
     withAsterisk?: boolean,
+    disabled?: boolean,
   ) => {
     const styles = STYLES.NewRequest;
 
@@ -106,21 +108,45 @@ export const UtilsDisplay = {
         )}
 
         <View style={styles.checkboxView}>
-          {data.map((item: CheckboxData, index: number) => (
-            <View style={styles.checkboxItem} key={index + 1} onTouchEnd={() => onHandleCheck(item, index + 1)}>
-              <Checkbox
+          {data.map((item: CheckboxData, index: number) => {
+            const isSelected = checkSelect === index + 1;
+
+            return (
+              <View
+                style={styles.checkboxItem}
                 key={index + 1}
-                style={{ borderRadius: 10 }}
-                value={checkSelect === index + 1}
-                color={checkSelect === index + 1 ? COLORS.powderBlue : undefined}
-              />
-              <Text style={styles.checkboxText}>{item.name}</Text>
-            </View>
-          ))}
+                onTouchEnd={
+                  disabled
+                    ? undefined
+                    : () => onHandleCheck(item, index + 1)
+                }
+              >
+                <Checkbox
+                  key={index + 1}
+                  style={{
+                    borderRadius: 10,
+
+                  }}
+                  value={isSelected}
+                  disabled={disabled}
+                  color={
+                    isSelected
+                      ? COLORS.powderBlue
+                      : undefined
+                  }
+                />
+
+                <Text style={styles.checkboxText}>
+                  {item.name}
+                </Text>
+              </View>
+            );
+          })}
         </View>
       </View>
     );
   },
+
 
   DisplayFieldTextInput: (
     handle: boolean,
@@ -282,7 +308,7 @@ export const UtilsDisplay = {
           disabled={disabled}
         >
           <StyledText style={styles.selectButtonText} textStyles={STYLES.StyledText}>
-            {disabled ? STRINGS.styledDisabled : valueExact || placeholder}
+            {valueExact || placeholder}
           </StyledText>
         </TouchableOpacity>
       </View>

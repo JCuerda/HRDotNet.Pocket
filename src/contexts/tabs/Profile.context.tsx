@@ -27,15 +27,15 @@ type ContactsContext = {
 
 export const Context = React.createContext<ContactsContext>({
   state: ValuesProfile.StatePersonal,
-  setState: () => {},
+  setState: () => { },
   payslip: ValuesProfile.StatePayslip,
-  setPayslip: () => {},
+  setPayslip: () => { },
   handle: ValuesProfile.Handle,
-  setHandle: () => {},
-  onFetchPayslip: () => {},
-  onFetchPayslipDetails: () => {},
-  onStopLoading: () => {},
-  updateProfile: () => {},
+  setHandle: () => { },
+  onFetchPayslip: () => { },
+  onFetchPayslipDetails: () => { },
+  onStopLoading: () => { },
+  updateProfile: () => { },
 });
 
 export const CtxProfile = ({ children }: { children: React.ReactNode }) => {
@@ -91,9 +91,9 @@ export const CtxProfile = ({ children }: { children: React.ReactNode }) => {
       await UtilsFetch.connect(
         APIMethods.POST,
         ContentTypes.Multipart,
-        `${process.env.EXPO_PUBLIC_REQUEST}/employee-management/employees/profiles/me/upload`,
+        `${process.env.EXPO_PUBLIC_REQUEST}/employee-management/me/profile/upload`,
         formData,
-      );
+      )
     } catch (error) {
       console.error('Upload error:', error);
     }

@@ -6,7 +6,7 @@
  */
 
 //--- React Modules
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 //--- Expo Modules
@@ -14,7 +14,6 @@ import { FontAwesome } from '@expo/vector-icons';
 //--- Others Modules
 import Note from 'src/components/note/Note';
 import LoaderPage from 'src/components/loader/LoaderPage';
-import PendingIconText from 'src/components/use/PendingIconText';
 import PendingsPanel from 'src/components/panel/home/PendingPanel';
 import PendingFilter from 'src/components/use/PendingFilter';
 import PendingsItem from 'src/components/item/PendingItem';
@@ -22,9 +21,10 @@ import { COLORS, DateTimeUtils, STRINGS, STYLES } from 'src';
 import { usePending } from 'src/contexts/pages';
 import { PendingApplications } from 'src/types/Pending';
 import TabHeader from 'src/components/header/TabHeader';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Pending: React.FC = () => {
-  const { state, handle, setHandle, onFetchPending, onHandleSearchSubmit } = usePending();
+  const { state, handle, setHandle, onFetchPending, onHandleSearchSubmit, onHandleClear } = usePending();
   const platformIOS = Platform.OS === 'ios';
   const search = STYLES.ComponentSearch(platformIOS);
 
@@ -40,9 +40,16 @@ const Pending: React.FC = () => {
 
   const sortedPendingApplications = Array.isArray(state.pendingApplications)
     ? state.pendingApplications.sort(
-        (a, b) => new Date(b.dateTransaction).getTime() - new Date(a.dateTransaction).getTime(),
-      )
+      (a, b) => new Date(b.dateTransaction).getTime() - new Date(a.dateTransaction).getTime(),
+    )
     : [];
+
+  useFocusEffect(
+    useCallback(() => {
+      onHandleClear()
+    }, [state.selectedButtonIndex]),
+  );
+
 
   return (
     <React.Fragment>
@@ -55,13 +62,7 @@ const Pending: React.FC = () => {
         <Pressable style={search.searchContainer} onPress={handlePress}>
           <FontAwesome name="filter" size={20} color={COLORS.orange} />
           <Text style={{ marginLeft: 5, fontSize: 16 }}>
-            {state.filterText ? (
-              <PendingIconText applicationType={state.filterText} renderAs="text" />
-            ) : state.fromDate && state.toDate ? (
-              `${state.fromDate}-${state.toDate}`
-            ) : (
-              `Search Filter`
-            )}
+            {state.filterLabel !== "" ? state.filterLabel : "Search Filter"}
           </Text>
         </Pressable>
       </View>
@@ -90,6 +91,7 @@ const Pending: React.FC = () => {
       {/* Selection Filter */}
       <PendingFilter
         visible={handle.isVisible}
+        state={state}
         close={() =>
           setHandle({
             isVisible: false,

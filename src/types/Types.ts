@@ -68,11 +68,11 @@ export type SchemaRequestApplications = {
     };
 
     dateFiled?:
-      | {
-          dateFrom: string;
-          dateTo: string;
-        }
-      | string;
+    | {
+      dateFrom: string;
+      dateTo: string;
+    }
+    | string;
 
     leaveParameter?: {
       // Leave
@@ -123,11 +123,11 @@ export type SchemaRequestApplications = {
       breakTimeOut: string;
       isPremium: boolean;
       shiftType?:
-        | {
-            shiftTypeId: number;
-            shiftType: string;
-          }
-        | string;
+      | {
+        shiftTypeId: number;
+        shiftType: string;
+      }
+      | string;
       shiftTypeId: number;
     };
 
@@ -291,11 +291,11 @@ export type Schedules = {
   breakTimeIn: string;
   breakTimeOut: string;
   shiftType:
-    | {
-        shiftTypeId: number;
-        shiftType: string;
-      }
-    | string;
+  | {
+    shiftTypeId: number;
+    shiftType: string;
+  }
+  | string;
   shiftTypeId: number;
   isPremium: boolean;
 };
@@ -716,6 +716,9 @@ export type StateLVRequest = {
   attachment: Attachment;
   documentNo?: string;
   referenceNo?: string;
+  cancelReason?: string;
+  approveReason?: string;
+  reviewReason?: string;
 };
 
 // ML Request
@@ -921,7 +924,7 @@ export type StateTimeOffButton = {
 };
 
 // PageHeader
-export type PropsPageHeader = { name: string };
+export type PropsPageHeader = { name: string, customNavigate?: () => void; };
 
 // Approvals Item
 export type PropsApprovalsItem = {
@@ -1163,4 +1166,4 @@ export type Badge = {
   // isLoading?: boolean;
 };
 
-export type AllApplicationState = StateCOSRequest | StateMLRequest | StateOBRequest | StateOTOFFRequest;
+export type AllApplicationState = StateCOSRequest | StateMLRequest | StateOBRequest | StateOTOFFRequest | StateLVRequest;

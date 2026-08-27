@@ -97,11 +97,10 @@ export const Utils = {
 
     const timeFrom: string = DateTimeUtils.isoToTimeUnits(val?.dateTimeRange!?.dateFrom);
 
-    const timeSched = `\n${
-      !DateTimeUtils.checkIsoNullValue(val?.dateTimeRange!?.dateTo)
-        ? timeFrom + ' - ' + DateTimeUtils.isoToTimeUnits(val?.dateTimeRange!?.dateTo)
-        : timeFrom
-    }`;
+    const timeSched = `\n${!DateTimeUtils.checkIsoNullValue(val?.dateTimeRange!?.dateTo)
+      ? timeFrom + ' - ' + DateTimeUtils.isoToTimeUnits(val?.dateTimeRange!?.dateTo)
+      : timeFrom
+      }`;
 
     if (val.source.toUpperCase().includes('L-')) {
       ((color = COLORS.lightPurple), (title = STRINGS.leave));
@@ -307,9 +306,8 @@ export const Utils = {
   formatNameHistory: (name?: { firstName?: string; middleName?: string; lastName?: string; suffix?: string }) => {
     if (!name) return '';
 
-    return `${name.lastName ? Utils.formatHyphenatedName(name.lastName) : ''}, ${
-      name.firstName ? Utils.formatHyphenatedName(name.firstName) : ''
-    } ${name.suffix ? Utils.properSuffixName(name.suffix) : ''} ${name.middleName ? Utils.formatHyphenatedName(name.middleName) : ''}`
+    return `${name.lastName ? Utils.formatHyphenatedName(name.lastName) : ''}, ${name.firstName ? Utils.formatHyphenatedName(name.firstName) : ''
+      } ${name.suffix ? Utils.properSuffixName(name.suffix) : ''} ${name.middleName ? Utils.formatHyphenatedName(name.middleName) : ''}`
       .replace(/\s+/g, ' ')
       .trim();
   },
@@ -470,9 +468,9 @@ export const Utils = {
   amountFormat: (amount: number) => {
     return amount
       ? amount.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
       : 0;
   },
 
@@ -567,7 +565,7 @@ export const Utils = {
           ...state.clockedData,
           address: currAddress
             ? `${checkNull(currAddress?.name)} ${checkNull(currAddress?.street)} ` +
-              `${checkNull(currAddress?.city)} ${checkNull(currAddress?.country)}`
+            `${checkNull(currAddress?.city)} ${checkNull(currAddress?.country)}`
             : STRINGS.noAddressLocation,
         },
       });
@@ -1037,7 +1035,7 @@ export const Utils = {
         break;
 
       case onPanel.LV:
-        dateToParse = DateTimeUtils.getIsoDateWord(data?.dateFiled || '');
+        dateToParse = DateTimeUtils.abbreviatedMonthDateRange(data?.startDate || '', data?.endDate || '');
         break;
 
       case onPanel.ML:
@@ -1077,7 +1075,12 @@ export const Utils = {
         break;
 
       case 4:
-        dateToParse = DateTimeUtils.getIsoDateWord((data?.filing?.dateFiled as string) || '');
+        const leaveDateFiled = data?.filing?.dateFiled;
+
+        dateToParse = DateTimeUtils.abbreviatedMonthDateRange(
+          typeof leaveDateFiled === 'object' ? leaveDateFiled.dateFrom : '',
+          typeof leaveDateFiled === 'object' ? leaveDateFiled.dateTo : '',
+        );
         break;
 
       case 5:
@@ -1184,11 +1187,13 @@ export const Utils = {
 
       case onPanel.LV:
         newFields = {
-          // Leave mappings
+          Reason: newData?.reason.trim(),
+          ReferenceNo: newData?.referenceNo.trim() ?? "",
         };
 
         oldFields = {
-          // Leave mappings
+          Reason: oldData?.filing.reason.trim(),
+          ReferenceNo: oldData?.filing?.referenceNo ?? "",
         };
         break;
 
@@ -1249,14 +1254,14 @@ export const Utils = {
         return [
           ...(dateFromChange || dateToChange
             ? [
-                `${fieldDisplayNames.COSDatePeriod}: from ${DateTimeUtils.abbreviatedMonthDateRange(
-                  DateTimeUtils.formatToDash(dateFromChange?.from || dateFromToUse),
-                  DateTimeUtils.formatToDash(dateToChange?.from || dateToUse),
-                )} into "${DateTimeUtils.abbreviatedMonthDateRange(
-                  DateTimeUtils.formatToDash(dateFromChange?.to || dateFromToUse),
-                  DateTimeUtils.formatToDash(dateToChange?.to || dateToUse),
-                )}"`,
-              ]
+              `${fieldDisplayNames.COSDatePeriod}: from ${DateTimeUtils.abbreviatedMonthDateRange(
+                DateTimeUtils.formatToDash(dateFromChange?.from || dateFromToUse),
+                DateTimeUtils.formatToDash(dateToChange?.from || dateToUse),
+              )} into "${DateTimeUtils.abbreviatedMonthDateRange(
+                DateTimeUtils.formatToDash(dateFromChange?.to || dateFromToUse),
+                DateTimeUtils.formatToDash(dateToChange?.to || dateToUse),
+              )}"`,
+            ]
             : []),
 
           ...orderedFields
@@ -1387,8 +1392,29 @@ export const Utils = {
         ].join(', ');
 
       case onPanel.LV:
-        // Leave-specific formatting
-        return '';
+        return [
+          ...Object.entries(changedFields)
+            .filter(([key]) => !["FileAttachment", "UploadedFile"].includes(key))
+            .map(([key, { from, to }]) => {
+              const displayKey = fieldDisplayNames[key] ?? key;
+
+              if (key === FieldKey.ReferenceNo) {
+                if (!from && to) {
+                  return `${displayKey}: Added "${to}"`;
+                }
+
+                if (from && !to) {
+                  return `${displayKey}: Removed "${from}"`;
+                }
+
+                return `${displayKey}: from "${from}" into "${to}"`;
+              }
+
+              return `${displayKey}: from "${from}" into "${to}"`;
+            }),
+
+          ...attachmentChanges,
+        ].join(", ");;
 
       case onPanel.OB:
         return [
@@ -1575,23 +1601,15 @@ export const FilingUtils = {
   },
 };
 
-const buildUrlQuery = (cutOffPeriod: [string | null, string | null] | undefined) => {
-  if (!cutOffPeriod?.[0] || !cutOffPeriod?.[1]) return null;
-
-  const removeDashFrom = DateTimeUtils.getRemoveDash(cutOffPeriod[0]);
-  const removeDashTo = DateTimeUtils.getRemoveDash(cutOffPeriod[1]);
-
-  return `&DateField=${STRINGS.filterDateFrom}&DateFrom=${removeDashFrom}&DateTo=${removeDashTo}&sortBy=-DocumentNo`;
-};
 
 export const RequestCounts = {
   refreshReviewalCounts: async () => {
     const { cutOffPeriod, setReviewalCounts } = useGlobalStore.getState();
-    const urlQuery = buildUrlQuery(cutOffPeriod);
-    if (!urlQuery) return;
+    const removeDashFrom = DateTimeUtils.getRemoveDash(cutOffPeriod[0] || "");
+    const removeDashTo = DateTimeUtils.getRemoveDash(cutOffPeriod[1] || "");
 
     try {
-      const counts = await useFetch.ReviewalsCounts(ValuesApprovals.State.buttons.length, urlQuery);
+      const counts = await useFetch.ReviewalsCounts(ValuesApprovals.State.buttons.length, removeDashFrom, removeDashTo);
       setReviewalCounts(counts);
     } catch (error) {
       console.error('Reviewal count refresh error:', error);
@@ -1600,11 +1618,11 @@ export const RequestCounts = {
 
   refreshApprovalCounts: async () => {
     const { cutOffPeriod, setApprovalCounts } = useGlobalStore.getState();
-    const urlQuery = buildUrlQuery(cutOffPeriod);
-    if (!urlQuery) return;
+    const removeDashFrom = DateTimeUtils.getRemoveDash(cutOffPeriod[0] || "");
+    const removeDashTo = DateTimeUtils.getRemoveDash(cutOffPeriod[1] || "");
 
     try {
-      const counts = await useFetch.ApprovalsCounts(ValuesApprovals.State.buttons.length, urlQuery);
+      const counts = await useFetch.ApprovalsCounts(ValuesApprovals.State.buttons.length, removeDashFrom, removeDashTo);
       setApprovalCounts(counts);
     } catch (error) {
       console.error('Approval count refresh error:', error);

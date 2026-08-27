@@ -143,7 +143,12 @@ const RequestFilter: React.FC<PropsRequestSearch> = ({ state, handle }) => {
         });
         setDocStatusValue(null);
       } else if (value == 'LeaveParameter') {
-        state[1]({ urlQuery: `&LeaveParameter=${leaveTypeValue}&sortBy=-DocumentNo` });
+        state[1]({
+          urlQuery: `&LeaveParameter=${leaveTypeValue}&sortBy=-DocumentNo`,
+          displayValue: `Leave Type: ${leaveTypeValue}`,
+          filterValue: leaveTypeValue || '',
+          filterType: value,
+        });
       } else if (value == 'DocStatus') {
         state[1]({
           displayValue: `Status: ${docStatusValue}`,
@@ -217,6 +222,26 @@ const RequestFilter: React.FC<PropsRequestSearch> = ({ state, handle }) => {
               value: item.name,
             }));
             setScheduleItems(mappedData);
+          } else {
+            console.error('response.data.items is not an array');
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } else if (state[0]?.selectedButton == 4) {
+      UtilsFetch.connect(
+        APIMethods.GET,
+        ContentTypes.JSON,
+        `${process.env.EXPO_PUBLIC_REQUEST}/leave-management/maintenance/leave-parameters?&pageSize=50`,
+      )
+        .then((response) => {
+          if (Array.isArray(response.data.items)) {
+            const mappedData = response.data.items.map((item: any, index: number) => ({
+              label: item.name,
+              value: item.name,
+            }));
+            setLeaveTypeItems(mappedData);
           } else {
             console.error('response.data.items is not an array');
           }

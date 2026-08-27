@@ -1,11 +1,10 @@
 // HRDotNet-Mobile
 // Designed by : Alex Diane Vivienne Candano
 // Developed by: Patrick William Quintana Lofranco, Jessie Cuerda
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import * as Animatable from 'react-native-animatable';
 import { View, Text, FlatList, StatusBar, Button } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-
 import Toast from 'src/components/use/Toast';
 import ApprovalsPanel from 'src/components/panel/home/approver/ApprovalsPanel';
 import ConfirmationApproval from 'src/components/prompt/ConfirmationApproval';
@@ -14,16 +13,16 @@ import { COLORS, STRINGS, STYLES } from 'src';
 import RequestFilter from 'src/components/use/RequestFilter';
 import { useApprovals } from 'src/contexts/pages';
 import { useFocusEffect } from 'expo-router';
-import { SchemaRequestApplications } from 'src/types/Types';
+import { SchemaRequestApplications, TypeNavStack } from 'src/types/Types';
 import { useGlobalStore } from 'src/store/GlobalStore';
 import { FilingPanel } from 'src/constants/Enum';
 import { FilingUtils } from 'src/utils/Utils';
 
-const Approvals: React.FC = () => {
+const Approvals: React.FC<TypeNavStack> = ({ navigation }) => {
   const styles = STYLES.Request;
 
-  const { cutOffPeriod, approvalCounts } = useGlobalStore();
-
+  const { cutOffPeriod, approvalCounts, resetCancelAction, selectedApplicationTab } = useGlobalStore();
+  const buttonListRef = useRef<FlatList<any>>(null);
   const { params, state, setState, handle, setHandle, onHandlePress, onHandleSetURLApproval, onHandleFetchApproval } =
     useApprovals();
 
@@ -33,11 +32,23 @@ const Approvals: React.FC = () => {
 
   useEffect(() => {
     onHandleFetchApproval();
-  }, [handle.refreshing, state.urlQuery, state.page, , params]);
+  }, [handle.refreshing, state.urlQuery, state.page, state.fetchKey, params]);
+
+
+  useEffect(() => {
+    if (selectedApplicationTab == null) return;
+    setState({ selectedButton: selectedApplicationTab })
+    buttonListRef.current?.scrollToIndex({
+      index: selectedApplicationTab,
+      animated: true,
+      viewPosition: 0.5,
+    });
+  }, [selectedApplicationTab])
 
   useFocusEffect(
     useCallback(() => {
       setHandle({ isLoading: true, refreshing: true });
+      resetCancelAction()
       const timeoutId = setTimeout(() => {
         setHandle({ isLoading: false, refreshing: true });
       }, 800);
@@ -49,7 +60,9 @@ const Approvals: React.FC = () => {
     <React.Fragment>
       <StatusBar backgroundColor={COLORS.powderBlue} barStyle="light-content" />
 
-      <PageHeader name={STRINGS.pageTitleApprovals} />
+      <PageHeader name={STRINGS.pageTitleApprovals} customNavigate={() => {
+        navigation.navigate(STRINGS.pathTabStack);
+      }} />
 
       {handle.isToast!.show && <Toast handle={handle.isToast!} setHandle={setHandle} />}
 
@@ -59,6 +72,7 @@ const Approvals: React.FC = () => {
         <View style={styles.container}>
           <View style={styles.wrapper}>
             <FlatList
+              ref={buttonListRef}
               data={state.buttons}
               renderItem={({ item, index }) => {
                 const filteredItems =
@@ -81,13 +95,13 @@ const Approvals: React.FC = () => {
                             styles.approvalCountButton,
                             state.selectedButton === index
                               ? {
-                                  color: COLORS.orange,
-                                  backgroundColor: COLORS.clearWhite,
-                                }
+                                color: COLORS.orange,
+                                backgroundColor: COLORS.clearWhite,
+                              }
                               : {
-                                  color: COLORS.clearWhite,
-                                  backgroundColor: COLORS.orange,
-                                },
+                                color: COLORS.clearWhite,
+                                backgroundColor: COLORS.orange,
+                              },
                           ]}
                         >
                           {count}
@@ -110,6 +124,15 @@ const Approvals: React.FC = () => {
               style={styles.buttonList}
               horizontal
               showsHorizontalScrollIndicator={false}
+              onScrollToIndexFailed={(info) => {
+                setTimeout(() => {
+                  buttonListRef.current?.scrollToIndex({
+                    index: info.index,
+                    animated: true,
+                    viewPosition: 0.5,
+                  });
+                }, 100);
+              }}
             />
           </View>
 

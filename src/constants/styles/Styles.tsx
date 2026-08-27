@@ -1137,9 +1137,7 @@ export const STYLES = {
     },
 
     clockInButton: {
-      //backgroundColor: COLORS.orange,
-      backgroundColor: 'gray', // temporary
-      opacity: 0.5, // temporary
+      backgroundColor: COLORS.orange,
       width: 170,
       borderRadius: 15,
       paddingVertical: 5,
@@ -1203,10 +1201,8 @@ export const STYLES = {
     },
 
     gridButton: {
-      width: 92,
-      height: 92,
       borderRadius: 10,
-      backgroundColor: COLORS.clearGray,
+      backgroundColor: COLORS.clearWhite,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -1217,7 +1213,6 @@ export const STYLES = {
       paddingTop: 5.5,
       fontSize: 12,
       textAlign: 'center',
-      flexWrap: 'wrap',
     },
 
     partitionWrapper: {
@@ -1251,7 +1246,7 @@ export const STYLES = {
     },
 
     badge: {
-      backgroundColor: COLORS.orange,
+      backgroundColor: COLORS.powderBlue,
       width: 35,
       height: 35,
       justifyContent: 'center',
@@ -1270,7 +1265,33 @@ export const STYLES = {
       textAlign: 'center',
       fontSize: 12,
     },
+
+    alignWrapper: {
+      borderRadius: 15,
+      backgroundColor: COLORS.clearWhite,
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      width: 150,
+      flexDirection: 'row',
+    },
+
+    totalText: {
+      fontFamily: 'Inter_700Bold',
+      fontSize: 20,
+      textAlign: 'center',
+    },
+
+    title: {
+      color: COLORS.black,
+      fontSize: 12,
+      paddingLeft: 15,
+      lineHeight: 14,
+      textAlign: 'center',
+      fontFamily: 'Inter_500Medium',
+    },
   }),
+
 
   ComponentTimeOff: StyleSheet.create({
     container: {
@@ -1286,7 +1307,6 @@ export const STYLES = {
       marginHorizontal: 8,
       flexDirection: 'row',
       justifyContent: 'space-evenly',
-      backgroundColor: COLORS.lightestOrange,
       paddingVertical: 8,
       borderRadius: 10,
     },
@@ -2272,6 +2292,13 @@ export const STYLES = {
       backgroundColor: COLORS.gray,
       padding: 12,
     },
+
+
+    disabledDate: {
+      borderRadius: 10,
+      backgroundColor: COLORS.gray,
+    },
+
 
     disabledInputText: {
       fontSize: 15,

@@ -13,6 +13,15 @@ interface GlobalInterface {
 
   reviewalCounts: Record<number, SchemaRequestApplications[]>;
   setReviewalCounts: (counts: Record<number, SchemaRequestApplications[]>) => void;
+
+  cancelActionFrom: string;
+  setCancelActionFrom: (cancelActionFrom: string) => void;
+
+  selectedApplicationTab: number;
+  setSelectedApplicationTab: (selectedApplicationTab: number) => void;
+
+  resetCancelAction: () => void;
+  resetSelectedApplicationTab: () => void;
 }
 
 export const useGlobalStore = create<GlobalInterface>((set, get) => ({
@@ -27,4 +36,19 @@ export const useGlobalStore = create<GlobalInterface>((set, get) => ({
 
   reviewalCounts: {},
   setReviewalCounts: (counts) => set({ reviewalCounts: counts }),
+
+  cancelActionFrom: "",
+  setCancelActionFrom: (cancelActionFrom) => set({ cancelActionFrom }),
+
+  selectedApplicationTab: 0,
+  setSelectedApplicationTab: (selectedApplicationTab) => set({ selectedApplicationTab }),
+
+  resetCancelAction: () => {
+    set({ cancelActionFrom: '' });
+  },
+
+  resetSelectedApplicationTab: () => {
+    set({ selectedApplicationTab: 0 });
+  }
+
 }));

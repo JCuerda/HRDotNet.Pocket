@@ -12,6 +12,7 @@ export type PendingStates = {
   selectedButtonIndex: number;
   searchFilterIndex: number;
   filterText: string;
+  filterLabel?: string;
   data: PendingData;
   page: number;
   count: number;
