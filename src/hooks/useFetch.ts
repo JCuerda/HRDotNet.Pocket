@@ -44,6 +44,8 @@ import {
   TypeReqAction,
   TypeApprovalPromptItem,
   LocationLang,
+  StateTimeOff,
+  LeaveLedgerEntries,
 } from 'src/types/Types';
 
 import {
@@ -62,6 +64,7 @@ import { PersonalStates } from 'src/types/Profile';
 import { TeamSchema, TeamsStates } from 'src/types/Teams';
 import { FilingPanel } from 'src/constants/Enum';
 import { useGlobalStore } from 'src/store/GlobalStore';
+import { State } from 'react-native-gesture-handler';
 
 export const useFetch = {
   Refresh: async (nav: StackNavigationProp<ParamListBase>, callback?: () => void) => {
@@ -238,7 +241,11 @@ export const useFetch = {
     setState: React.Dispatch<Partial<StateCalendar>>,
     handle: TypeHandle,
     setHandle: React.Dispatch<Partial<TypeHandle>>,
+
   ) => {
+    const selectedDate = state.selected.date
+    const dayString = `${selectedDate.slice(0, 4)}-${selectedDate.slice(4, 6)}-${selectedDate.slice(6, 8)}`;
+
     setHandle(handle.isLoading ? { isLoading: true } : { isLoadMore: true });
 
     await UtilsFetch.connect(
@@ -278,6 +285,46 @@ export const useFetch = {
           }
           return acc;
         }, {});
+
+        if (state.isChangedMonth) {
+
+          const prevDate: string = DateTimeUtils.dateDashToDefaultLessDay(dayString);
+          const nextDate: string = DateTimeUtils.dateDashToDefaultAddDay(dayString);
+
+          const calendarVal = (date: string) => {
+            const dateVal = DateTimeUtils.dateDashToWithTZ(date);
+            return response.data.calendarDates!?.find((dateEntry: { date: string }) => dateEntry.date === dateVal)?.entries;
+          };
+
+          const calendarValSource = (date: string) => {
+            return calendarVal(date) ? calendarVal(date)![calendarVal(date) ? calendarVal(date)!.length - 1 : 0].source : '';
+          };
+
+          const calendarValRD = (date: string) => {
+            return calendarVal(date) ? calendarVal(date)![0].isRestDay : false;
+          };
+
+          setState({
+            selected: {
+              ...state.selected,
+              date: DateTimeUtils.dateDashToDefault(dayString),
+              entry: calendarVal(dayString)!,
+
+              previous: {
+                date: DateTimeUtils.dateDashToDefaultLessDay(dayString),
+                source: calendarValSource(prevDate),
+                isRestDay: calendarValRD(prevDate)!,
+              },
+
+              next: {
+                date: DateTimeUtils.dateDashToDefaultAddDay(dayString),
+                source: calendarValSource(nextDate),
+                isRestDay: calendarValRD(nextDate)!,
+              },
+            },
+            isChangedMonth: false
+          });
+        }
 
         setState({
           data: response.data,
@@ -791,12 +838,68 @@ export const useFetch = {
         leaveSick: { count: sickBalance },
       });
 
-    }).catch((err) => {
-      console.log("Err")
-    }).finally(() => setHandle({ isLoading: false, refreshing: false }));;
 
+    }).catch(async (err) => {
 
+      const errors = await UtilsFetch.catchErrors(err);
+      console.log("Err", errors)
+    }).finally(() => setHandle({
+      isLoading: false, refreshing: false,
+    }));
+  },
 
+  LeaveLedger: async (
+    state: StateTimeOff,
+    setState: React.Dispatch<Partial<StateTimeOff>>,
+    handle: TypeHandle,
+    setHandle: React.Dispatch<Partial<TypeHandle>>,
+  ) => {
+    try {
+
+      setHandle({
+        isLoading: state.pageCount != 1 ? false : true,
+        isLoadMore: true,
+        isWaiting: state.pageCount != 1 ? true : false,
+      });
+      const leaveId = state.page; // Page 1 if VL else SL 
+
+      const url =
+        `${process.env.EXPO_PUBLIC_LVLEDGER}` +
+        `?LeaveParameterId=${leaveId}` +
+        `&Page=${state.pageCount}` +
+        `&PageSize=10`;
+      const response = await axios.get(url);
+
+      const newEntries: LeaveLedgerEntries[] =
+        response.data?.employee?.entries ?? [];
+
+      if (newEntries.length === 0) {
+        setHandle({
+          isLoadMore: false,
+        });
+
+        return;
+      }
+
+      setState({
+        data:
+          state.pageCount > 1
+            ? [...state.data, ...newEntries]
+            : newEntries,
+        pageCount: state.pageCount + 1,
+
+      });
+
+    } catch (error) {
+      setHandle({ isLoadMore: false })
+      console.log('LeaveLedger error:', error);
+    } finally {
+      setHandle({
+        isLoading: false,
+        refreshing: false,
+        isWaiting: false,
+      });
+    }
   },
 
   SingleApprovals: async (

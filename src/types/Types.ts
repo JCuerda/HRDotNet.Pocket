@@ -658,12 +658,18 @@ export type StatePending = {
   }>;
 };
 
+export type GroupedCalendarEntry = SchemaCalendarEntries & {
+  missedLogs?: SchemaCalendarEntries[];
+};
+
+
 // TimeOff
 export type StateTimeOff = {
   year: string;
-  data: ArrayLike<LeaveLedgerEntries>;
+  data: LeaveLedgerEntries[];
   count: number;
   page: number;
+  pageCount: number; // For pagination
 };
 
 // Timesheet
@@ -851,10 +857,13 @@ export type StateCalendar = {
         color: string;
         key: string;
       }>;
+      selected?: boolean;
+      selectedColor?: string;
     };
   };
   isMonthModalVisible: boolean;
   isYearModalVisible: boolean;
+  isChangedMonth: boolean;
   selectedMonth: string;
   selectedYear: string;
   selectedDate: string;

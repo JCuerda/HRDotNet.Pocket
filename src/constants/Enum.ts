@@ -38,7 +38,11 @@ export enum CancelActionFrom {
   Review = 'Review',
   Approve = 'Approve'
 }
-
+export enum CalendarSource {
+  FILO = "FILO",
+  PROCESSLOGS = "PROCESS LOGS",
+  DEFAULT = "DEFAULT"
+}
 type FieldLabelsType = {
   [key: number]: {
     [key: string]: string;

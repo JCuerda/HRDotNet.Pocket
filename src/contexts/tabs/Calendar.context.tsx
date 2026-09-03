@@ -2,7 +2,7 @@
 // Designed by : Alex Diane Vivienne Candano
 // Developed by: Patrick William Quintana Lofranco, Jessie Cuerda
 
-import React, { createContext, useReducer } from 'react';
+import React, { createContext, useReducer, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 
 import { ValuesCalendar } from 'src/constants/Values';
@@ -20,18 +20,20 @@ type TypeContext = {
   onHandlePressDate: (day: { dateString: string }) => void;
   onHandleMonthChange: (day: string) => void;
   onHandleEffectI: () => void;
+
+
 };
 
 export const Context = createContext<TypeContext>({
   state: ValuesCalendar.State,
-  setState: () => {},
+  setState: () => { },
   handle: ValuesCalendar.Handle,
-  setHandle: () => {},
+  setHandle: () => { },
 
-  onHandleSelectedDate: () => {},
-  onHandlePressDate: () => {},
-  onHandleMonthChange: () => {},
-  onHandleEffectI: () => {},
+  onHandleSelectedDate: () => { },
+  onHandlePressDate: () => { },
+  onHandleMonthChange: () => { },
+  onHandleEffectI: () => { },
 });
 
 export const CtxCalendar = ({ children }: { children: React.ReactNode }) => {
@@ -47,6 +49,8 @@ export const CtxCalendar = ({ children }: { children: React.ReactNode }) => {
     ValuesCalendar.Handle,
   );
 
+
+
   const onHandleSelectedDate = () => {
     const marked: { [key: string]: {} } = {};
     for (const date in state.data) {
@@ -59,7 +63,8 @@ export const CtxCalendar = ({ children }: { children: React.ReactNode }) => {
     return marked;
   };
 
-  const onHandlePressDate = (day: { dateString: string }) => {
+  const onHandlePressDate = async (day: { dateString: string }) => {
+
     const prevDate: string = DateTimeUtils.dateDashToDefaultLessDay(day.dateString);
     const nextDate: string = DateTimeUtils.dateDashToDefaultAddDay(day.dateString);
 
@@ -97,10 +102,12 @@ export const CtxCalendar = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
+
   const onHandleMonthChange = (date: string) => {
     setState({
-      selected: { ...state.selected, date: '' },
+      selected: { ...state.selected, date: DateTimeUtils.dateDashToDefault(date), },
       calendarDate: DateTimeUtils.dateDashToDefault(date),
+      isChangedMonth: true,
     });
   };
 
