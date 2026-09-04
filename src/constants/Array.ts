@@ -1414,5 +1414,6 @@ export const ARRAY = {
     { source: 'bdl', color: COLORS.palePink },
     { source: 'el', color: COLORS.palePink },
     { source: 'sal', color: COLORS.palePink },
+    { source: 'filo', color: COLORS.paleGreen },
   ],
 };

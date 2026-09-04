@@ -65,6 +65,7 @@ import { TeamSchema, TeamsStates } from 'src/types/Teams';
 import { FilingPanel } from 'src/constants/Enum';
 import { useGlobalStore } from 'src/store/GlobalStore';
 import { State } from 'react-native-gesture-handler';
+import { COLORS } from 'src/constants/Colors';
 
 export const useFetch = {
   Refresh: async (nav: StackNavigationProp<ParamListBase>, callback?: () => void) => {
@@ -273,18 +274,24 @@ export const useFetch = {
               const entrySource = entry.source.toLowerCase();
               const sourceObject = ARRAY.sourceColorMap.find(({ source }) => entrySource.includes(source));
               if (sourceObject && !colors.some((c) => c.color === sourceObject.color)) {
-                colors.push({ color: sourceObject.color, key: `${item.date}-${sourceObject.source}-${colors.length}` });
+                if (entrySource == "filo" && entry.dateTimeRange.dateFrom === STRINGS.calendarInitialDate && entry.dateTimeRange.dateTo === STRINGS.calendarInitialDate) {
+                  colors.push({ color: COLORS.red, key: `${item.date}-${sourceObject.source}-${colors.length}` });
+                } else {
+                  colors.push({ color: sourceObject.color, key: `${item.date}-${sourceObject.source}-${colors.length}` });
+                }
               }
 
               return colors;
             }, []);
 
-            if (dots.length) {
-              acc[item.date.slice(0, 10)] = { dots }; // Extract the date part (YYYY-MM-DD)
+            if (dots?.length) {
+              acc[item.date.slice(0, 10)] = { dots };
             }
           }
+
           return acc;
         }, {});
+
 
         if (state.isChangedMonth) {
 
