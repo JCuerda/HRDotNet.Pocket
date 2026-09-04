@@ -267,17 +267,63 @@ export const useFetch = {
             });
             return acc;
           }, []) || [];
-
         const markedDates = response.data.calendarDates?.reduce((acc: any, item: any) => {
           if (holidayDates.includes(item.date)) {
+
+            const isRestDay = item.entries?.some(
+              (entry: any) =>
+                entry.source?.toLowerCase() === "default" && entry.isRestDay === true,
+            );
+            const isHoliday = item.entries?.some((entry: any) => entry.source?.toLowerCase().includes("holiday"))
+
+            const isLeave = item.entries?.some((entry: any) => {
+              const source = entry.source?.toLowerCase() ?? "";
+
+              return source.includes("l-") && !source.includes("ml-");
+            });
+
             const dots = item.entries?.reduce((colors: any[], entry: any) => {
               const entrySource = entry.source.toLowerCase();
-              const sourceObject = ARRAY.sourceColorMap.find(({ source }) => entrySource.includes(source));
-              if (sourceObject && !colors.some((c) => c.color === sourceObject.color)) {
-                if (entrySource == "filo" && entry.dateTimeRange.dateFrom === STRINGS.calendarInitialDate && entry.dateTimeRange.dateTo === STRINGS.calendarInitialDate) {
-                  colors.push({ color: COLORS.red, key: `${item.date}-${sourceObject.source}-${colors.length}` });
+
+              const sourceObject = ARRAY.sourceColorMap.find(({ source }) =>
+                entrySource.includes(source),
+              );
+
+              const isFilo = entrySource === "filo";
+
+              const isInitialDate =
+                entry.dateTimeRange.dateFrom === STRINGS.calendarInitialDate &&
+                entry.dateTimeRange.dateTo === STRINGS.calendarInitialDate;
+
+              if (!sourceObject) {
+                return colors;
+              }
+
+              if (isFilo && isHoliday && isInitialDate) {
+                return colors;
+              }
+
+              if (isFilo && isLeave && isInitialDate) {
+                return colors;
+              }
+
+              if (isFilo && isRestDay && isInitialDate) {
+                return colors;
+              }
+
+              if (!colors.some((c) => c.color === sourceObject.color)) {
+                // FILO + NOT REST DAY + NO LOG = RED
+                if (isFilo && !isRestDay && isInitialDate) {
+                  colors.push({
+                    color: COLORS.red,
+                    key: `${item.date}-${sourceObject.source}-${colors.length}`,
+                  });
                 } else {
-                  colors.push({ color: sourceObject.color, key: `${item.date}-${sourceObject.source}-${colors.length}` });
+                  // Normal filing / FILO with a log
+                  colors.push({
+                    color: sourceObject.color,
+                    key: `${item.date}-${sourceObject.source}-${colors.length}`,
+                  });
                 }
               }
 
@@ -291,6 +337,7 @@ export const useFetch = {
 
           return acc;
         }, {});
+
 
 
         if (state.isChangedMonth) {

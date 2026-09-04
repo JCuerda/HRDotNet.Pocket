@@ -2,7 +2,7 @@
 // Designed by : Alex Diane Vivienne Candano
 // Developed by: Patrick William Quintana Lofranco, Jessie Cuerda
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StatusBar } from 'react-native';
 import { View, Text, TouchableOpacity } from 'react-native';
 
@@ -18,6 +18,7 @@ import { STYLES_CALENDAR } from 'src/constants/styles/Calendar';
 import { useCalendar } from 'src/contexts/tabs';
 import { StateCalendar } from 'src/types/Types';
 import MonthYearPicker from 'src/components/modal/MonthYearPicker';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Calendar: React.FC = () => {
   const styles = STYLES_CALENDAR.Calendar;
@@ -25,9 +26,12 @@ const Calendar: React.FC = () => {
 
   const [markedDates, setMarkedDates] = useState<StateCalendar['markedDates']>();
 
-  useEffect(() => {
-    onHandleEffectI();
-  }, [state.calendarDate, state.isChangedMonth]);
+  useFocusEffect(
+    useCallback(() => {
+      onHandleEffectI();
+    }, [state.calendarDate, state.isChangedMonth]),
+  );
+
 
   useEffect(() => {
     const selectedDate = state.selected.date;
