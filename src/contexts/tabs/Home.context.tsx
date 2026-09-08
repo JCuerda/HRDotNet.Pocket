@@ -73,7 +73,7 @@ export const CtxHome = ({ children }: { children: React.ReactNode }) => {
   };
 
   const onHandleEffectII = async () => {
-    await useFetch.TimeOff(navigation, setState, handle, setHandle);
+    await useFetch.LeaveBalances(navigation, setState, handle, setHandle);
   };
 
   const onHandleBadge = () => {

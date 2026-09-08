@@ -89,68 +89,154 @@ export const Utils = {
     ) : null;
   },
 
+  getSourceOrder: (source: string): number => {
+    const upperSource = source.toUpperCase();
+
+    if (upperSource.startsWith('L-')) {
+      return ARRAY.sourceOrder.indexOf('LEAVE');
+    }
+
+    if (upperSource.includes(STRINGS.holiday.toUpperCase())) {
+      return ARRAY.sourceOrder.indexOf('HOLIDAY');
+    }
+
+    return ARRAY.sourceOrder.indexOf(upperSource);
+  },
+
+  groupCalendarEntries: (
+    entries: SchemaCalendarEntries[]
+  ): SchemaCalendarEntries[] => {
+
+    if (!entries) {
+      return []
+    }
+    const missedLogs = entries.filter((entry) =>
+      entry.source.toUpperCase().startsWith('ML-')
+    );
+
+    const otherEntries = entries.filter(
+      (entry) => !entry.source.toUpperCase().startsWith('ML-')
+    );
+
+    // Merge ML-1 and ML-2 into one ML entry
+    if (missedLogs.length > 0) {
+      const ml1 = missedLogs.find(
+        (entry) => entry.source.toUpperCase() === 'ML-1'
+      );
+
+      const ml2 = missedLogs.find(
+        (entry) => entry.source.toUpperCase() === 'ML-2'
+      );
+
+      const firstMissedLog = ml1 || ml2;
+
+      if (firstMissedLog) {
+        otherEntries.push({
+          ...firstMissedLog,
+          source: 'ML',
+          dateTimeRange: {
+            dateFrom:
+              ml1?.dateTimeRange?.dateFrom ||
+              STRINGS.calendarInitialDate,
+
+            dateTo:
+              ml2?.dateTimeRange?.dateFrom ||
+              STRINGS.calendarInitialDate,
+          },
+        });
+      }
+    }
+
+    return otherEntries.sort(
+      (a, b) => Utils.getSourceOrder(a.source) - Utils.getSourceOrder(b.source)
+    );
+  },
+
+
+
+
   checkCalendarEntrySource: (val: SchemaCalendarEntries) => {
     let color: string = '',
       title: string = '',
       name: string | undefined = '',
       tag: string = '';
 
-    const timeFrom: string = DateTimeUtils.isoToTimeUnits(val?.dateTimeRange!?.dateFrom);
 
-    const timeSched = `\n${!DateTimeUtils.checkIsoNullValue(val?.dateTimeRange!?.dateTo)
-      ? timeFrom + ' - ' + DateTimeUtils.isoToTimeUnits(val?.dateTimeRange!?.dateTo)
-      : timeFrom
-      }`;
 
+    const dateFrom = val?.dateTimeRange!?.dateFrom;
+    const dateTo = val?.dateTimeRange!?.dateTo;
+
+    const isMissingTimeIn =
+      dateFrom === STRINGS.calendarInitialDate;
+
+    const isMissingTimeOut =
+      dateTo === STRINGS.calendarInitialDate;
+
+    const timeFrom = isMissingTimeIn
+      ? STRINGS.missingLogs
+      : DateTimeUtils.isoToTimeUnits(dateFrom);
+
+    const timeTo = isMissingTimeOut
+      ? STRINGS.missingLogs
+      : DateTimeUtils.isoToTimeUnits(dateTo);
+
+    const timeSched =
+      isMissingTimeIn && isMissingTimeOut
+        ? `\n${STRINGS.noLogsCalendar}`
+        : `\n${timeFrom} - ${timeTo}`;
     if (val.source.toUpperCase().includes('L-')) {
-      ((color = COLORS.lightPurple), (title = STRINGS.leave));
+      ((color = COLORS.palePink), (title = STRINGS.leave));
     } else if (val.source.includes(STRINGS.holiday)) {
-      color = COLORS.red;
+      color = COLORS.lightRed;
       title = val.source.split(' - ')[1];
       tag = STRINGS.holiday.toUpperCase();
     } else {
       switch (val.source) {
         case 'DEFAULT':
         case 'SA':
-          color = COLORS.orange;
+          color = COLORS.paleYellow;
           name = val.source === 'SA' ? STRINGS.schedAssignment : STRINGS.defaultSched;
           title = val.source === 'SA' ? STRINGS.schedAssignment + timeSched : STRINGS.defaultSched + timeSched;
           break;
 
         case 'COS':
-          color = COLORS.lightOrange;
+          color = COLORS.lightPeach;
           name = STRINGS.changeOfSchedule;
           title = STRINGS.changeOfSchedule + timeSched;
           break;
 
         case 'OT':
-          color = COLORS.lightBlue;
+          color = COLORS.lightBlueCalendar;
           name = STRINGS.overtime;
           title = STRINGS.overtime + timeSched;
           break;
 
         case 'ML':
-          color = COLORS.green;
+          color = COLORS.lightAqua;
           name = STRINGS.missedLog;
           title = STRINGS.missedLog + timeSched;
           break;
 
         case 'OB':
-          color = COLORS.blue;
+          color = COLORS.lightPurpleCalendar;
           name = STRINGS.officialBusiness;
           title = STRINGS.officialBusiness + timeSched;
           break;
 
         case 'CTO':
-          color = COLORS.blue;
+          color = COLORS.lightBrown;
           name = STRINGS.compensatoryTimeOff;
           title = STRINGS.compensatoryTimeOff + timeSched;
           break;
 
+        case 'FILO':
+          color = COLORS.paleGreen;
+          name = STRINGS.processLogs;
+          title = STRINGS.processLogs + timeSched;
+          break;
+
         default:
-          color = COLORS.darkGray;
-          name = undefined;
-          title = 'Event';
+          return undefined;
       }
     }
 

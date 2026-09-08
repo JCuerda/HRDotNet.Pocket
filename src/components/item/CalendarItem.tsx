@@ -2,7 +2,7 @@
 // Designed by : Alex Diane Vivienne Candano
 // Developed by: Patrick William Quintana Lofranco, Jessie Cuerda
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { Shadow } from 'react-native-shadow-2';
 import { FontAwesome } from '@expo/vector-icons';
@@ -13,6 +13,7 @@ import { SchemaCalendarEntries } from 'src/types/Types';
 import Note from '../note/Note';
 import { useCalendar } from 'src/contexts/tabs';
 import BottomSheet from 'src/components/bottom-sheet/BottomSheet';
+import { CalendarSource } from 'src/constants/Enum';
 
 const CalendarItem: React.FC = () => {
   const styles = STYLES.ComponentCalendarItem;
@@ -21,19 +22,23 @@ const CalendarItem: React.FC = () => {
     state: { selected },
   } = useCalendar();
 
-  const checkCalendarSource = () =>
-    Utils.checkCalendarSource(
-      selected.entry[selected.entry.length - 1].isRestDay
-        ? STRINGS.RD
-        : selected.entry[selected.entry.length - 1].source,
-    );
+  // const checkCalendarSource = () =>
+  //   Utils.checkCalendarSource(
+  //     selected.entry[selected.entry.length - 1].isRestDay
+  //       ? STRINGS.RD
+  //       : selected.entry[selected.entry.length - 1].source,
+  //   );
 
   const subDayContent = (content: SchemaCalendarEntries) => {
     const sourceProps = Utils.checkCalendarEntrySource(content);
+
+    if (!sourceProps) {
+      return null;
+    }
     return (
       <View style={styles.subDayContentView}>
         <Text style={[styles.subDayContentTitle, { backgroundColor: sourceProps.color }]}>
-          {sourceProps.tag || content.source}
+          {content.source == CalendarSource.FILO ? CalendarSource.PROCESSLOGS : sourceProps.tag || content.source}
         </Text>
 
         <Text style={styles.subDayContentText}>{sourceProps.title}</Text>
@@ -42,7 +47,7 @@ const CalendarItem: React.FC = () => {
   };
 
   const DisplayOtherDates = (title: string, data: { date: string; source: string; isRestDay: boolean }) => {
-    const sourceProps = Utils.checkCalendarSource(data.isRestDay ? STRINGS.RD : data.source);
+    const sourceProps = Utils.checkCalendarSource(data.isRestDay ? STRINGS.RD : CalendarSource.DEFAULT);
     return (
       <View style={styles.dayBelowWrapper}>
         <View style={styles.rowWrapper}>
@@ -61,11 +66,7 @@ const CalendarItem: React.FC = () => {
   const DisplayStatus = () => {
     return selected.date == DateTimeUtils.getCurrDateDefault()
       ? ARRAY.dayStatus[0]
-      : selected.date == DateTimeUtils.getCurrDateDefaultLessDay()
-        ? ARRAY.dayStatus[1]
-        : selected.date == DateTimeUtils.getCurrDateDefaultAddDay()
-          ? ARRAY.dayStatus[2]
-          : STRINGS.event;
+      : "";
   };
 
   return (
@@ -84,7 +85,7 @@ const CalendarItem: React.FC = () => {
               <ScrollView>
                 <View style={styles.selectedEvent}>
                   <React.Fragment>
-                    <Shadow
+                    {/* <Shadow
                       distance={3}
                       offset={[1.5, 1.5]}
                       startColor={checkCalendarSource().color}
@@ -100,13 +101,17 @@ const CalendarItem: React.FC = () => {
 
                         <Text style={styles.dayEventText}>{checkCalendarSource().tag || STRINGS.none}</Text>
                       </View>
-                    </Shadow>
+                    </Shadow> */}
 
                     <View style={styles.dayContentWrapper}>
-                      {selected.entry.map((item: SchemaCalendarEntries, index: number) => (
-                        <View key={index}>{subDayContent(item)}</View>
-                      ))}
+                      {Utils.groupCalendarEntries(selected.entry).map(
+                        (item: SchemaCalendarEntries, index: number) => (
+                          <View key={index}>{subDayContent(item)}</View>
+                        )
+                      )}
+
                     </View>
+
 
                     {selected.previous.source && DisplayOtherDates(STRINGS.previous, selected.previous)}
                     {selected.next.source && DisplayOtherDates(STRINGS.upcoming, selected.next)}

@@ -600,6 +600,22 @@ export const STYLES = {
       backgroundColor: COLORS.clearWhite,
     },
 
+
+    loader: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      alignSelf: 'center',
+      paddingBottom: 20,
+      flexDirection: 'row',
+    },
+
+    loaderText: {
+      marginLeft: 10,
+      fontFamily: 'Inter_500Medium',
+      color: COLORS.lighterGray,
+    },
+
+
     wrapper: {
       opacity: 1,
       flex: 1,
@@ -1460,7 +1476,7 @@ export const STYLES = {
     subDayContentTitle: {
       backgroundColor: COLORS.gray,
       fontFamily: 'Inter_600SemiBold',
-      color: COLORS.clearWhite,
+      color: COLORS.darkGrayText,
       paddingVertical: 2,
       width: 130,
       borderRadius: 5,

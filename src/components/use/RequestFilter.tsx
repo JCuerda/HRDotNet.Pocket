@@ -108,7 +108,7 @@ const RequestFilter: React.FC<PropsRequestSearch> = ({ state, handle }) => {
           });
         } else if (value === 'DateTransaction') {
           state[1]({
-            displayValue: `Transaction Date: ${DateTimeUtils.getIsoDateWord(componentState.searchDates.from || '')} - ${DateTimeUtils.getIsoDateWord(componentState.searchDates.to || '')}`,
+            displayValue: `Date Transaction: ${DateTimeUtils.getIsoDateWord(componentState.searchDates.from || '')} - ${DateTimeUtils.getIsoDateWord(componentState.searchDates.to || '')}`,
             filterValue: `${componentState.searchDates.from} - ${componentState.searchDates.to}`,
             filterType: value,
           });
@@ -262,7 +262,8 @@ const RequestFilter: React.FC<PropsRequestSearch> = ({ state, handle }) => {
     } else if (
       type === STRINGS.filterDateFiled ||
       type === STRINGS.filterDateTransaction ||
-      type === STRINGS.filterDateFrom
+      type === STRINGS.filterDateFrom ||
+      type === STRINGS.fieldDateTransaction
     ) {
       const [from, to] = value.split(' - ');
       setComponentState({

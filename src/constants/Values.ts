@@ -406,6 +406,7 @@ export const ValuesCalendar = {
     },
     isMonthModalVisible: false,
     isYearModalVisible: false,
+    isChangedMonth: false,
     selectedMonth: today.toLocaleString('en-US', { month: '2-digit' }),
     selectedYear: today.getFullYear().toString(),
     selectedDate: `${today.getFullYear()}-${today.toLocaleString('en-US', { month: '2-digit' })}-01`,
@@ -586,10 +587,13 @@ export const ValuesTimeOff = (params?: TypeTimeOff) => {
       data: ValueLeaveLedgerEntries,
       page: params?.page || 0,
       count: params?.data?.count || 0,
+      pageCount: 1
     } satisfies StateTimeOff,
 
     Handle: {
       isLoading: true,
+      isWaiting: false,
+      isLoadMore: false,
       refreshing: false,
     } satisfies TypeHandle,
   };

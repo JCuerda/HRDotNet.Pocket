@@ -7,6 +7,7 @@ export const COLORS = {
   offWhite: '#F2F1F0',
   clearWhite: '#FFFFFF',
   grayWhite: '#F8F8F8',
+  darkGrayText: '#6D6D6D',
 
   lightOrange: '#FD8A50',
   orange: '#FF924B',
@@ -41,4 +42,17 @@ export const COLORS = {
   shadowGray: 'rgba(119, 119, 119, 0.06)',
   opaqueRed: 'rgba(246, 69, 69, 0.4)',
   opaqueGreen: 'rgba(0,255,0,0.2)',
+
+  //calendar color 
+  paleYellow: '#FFF9C4', // Default
+  paleGreen: '#DBF3E0', // FILO
+  palePink: '#FFD4F1', // Leave
+  lightPurpleCalendar: '#E6CCFF', // OB
+  lightAqua: '#B6F0ED', // ML
+  lightBlueCalendar: '#BFE1FF', // OT
+  lightBrown: '#EDD2B7', // CTO
+  lightRed: '#FFE2DE', // Holiday
+  lightPeach: '#FFDEB2', //COS 
+
+
 };

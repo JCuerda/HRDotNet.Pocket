@@ -2,7 +2,7 @@
 // Designed by : Alex Diane Vivienne Candano
 // Developed by: Patrick William Quintana Lofranco, Jessie Cuerda
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { View, Text, FlatList } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { Image } from 'expo-image';
@@ -15,11 +15,13 @@ import { LeaveLedgerEntries } from 'src/types/Types';
 import { STRINGS, COLORS, STYLES, ASSETS } from 'src';
 import { useTimeOff } from 'src/contexts/pages';
 import Note from 'src/components/note/Note';
+import EndListNote from 'src/components/note/EndListNote';
+import { useFocusEffect } from '@react-navigation/native';
 
 const TimeOff: React.FC = () => {
   const styles = STYLES.TimeOff;
 
-  const { state, handle, onHandleEffectI } = useTimeOff();
+  const { state, handle, setHandle, setState, onHandleEffectI, onHandleFetchLeaveLedger } = useTimeOff();
 
   const renderItem = ({ item, index }: { item: LeaveLedgerEntries; index: number }) => (
     <Animatable.View
@@ -47,6 +49,38 @@ const TimeOff: React.FC = () => {
   useEffect(() => {
     onHandleEffectI();
   }, []);
+
+  useEffect(() => {
+    onHandleFetchLeaveLedger()
+  }, [state.pageCount])
+
+  const ListFooterComponent = () => {
+    return (
+      <React.Fragment>
+        {Array.isArray(state.data) && state.data.length <= 0 && !handle.isLoading && !handle.isWaiting && <Note text={STRINGS.nothingFound} icon="magnifying-glass" />}
+
+        {handle.isWaiting && (
+          <View style={styles.loader}>
+            <Image source={ASSETS.loadEllipsis} style={{ width: 40, height: 40 }} />
+
+            <Text style={styles.loaderText}>{STRINGS.loading}</Text>
+          </View>
+        )}
+
+        {!handle.isLoadMore && state.data.length > 0 && <EndListNote />}
+      </React.Fragment>
+    );
+  };
+
+  const onHandleSetReachedEnd = () => {
+
+    setHandle({ isWaiting: true });
+    setState({
+      pageCount: (state.pageCount || 1) + 1,
+    });
+
+  };
+
 
   return (
     <View style={styles.container}>
@@ -78,19 +112,33 @@ const TimeOff: React.FC = () => {
 
           <Text style={styles.detailsTitle}>{STRINGS.details}</Text>
 
-          <FlatList
-            showsVerticalScrollIndicator={false}
-            keyExtractor={(item, index) => index.toString()}
-            data={
-              state.data?.length! > 0 && state.data[0].id && Array.isArray(state.data)
-                ? state.data.sort((a: { documentNo: string | null }, b: { documentNo: string | null }) =>
-                    b.documentNo === null ? -1 : a.documentNo === null ? 1 : b.documentNo.localeCompare(a.documentNo),
-                  )
-                : []
-            }
-            renderItem={renderItem}
-            ListEmptyComponent={<Note text={STRINGS.nothingFound} icon="magnifying-glass" />}
-          />
+          {Array.isArray(state.data) && state.data.length > 0 ? (
+            <FlatList
+              showsVerticalScrollIndicator={false}
+              keyExtractor={(item, index) => index.toString()}
+              data={
+                Array.isArray(state.data) && state.data.length > 0
+                  ? [...state.data].sort((a, b) => {
+                    if (a.documentNo === null) return 1;
+                    if (b.documentNo === null) return -1;
+
+                    return b.documentNo.localeCompare(a.documentNo);
+                  })
+                  : []
+              }
+              onEndReached={() => {
+                handle.isLoadMore &&
+                  !handle.isWaiting &&
+                  state.data &&
+                  onHandleSetReachedEnd();
+              }}
+
+              renderItem={renderItem}
+              ListFooterComponent={ListFooterComponent}
+            />
+          ) : (
+            <Note text={STRINGS.nothingFound} icon="magnifying-glass" />
+          )}
         </View>
       )}
     </View>

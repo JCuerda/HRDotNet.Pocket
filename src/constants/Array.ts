@@ -531,6 +531,19 @@ export const ARRAY = {
     },
   ],
 
+
+  sourceOrder: [
+    'DEFAULT',
+    'FILO',
+    'LEAVE',
+    'OB',
+    'ML',
+    'OT',
+    'CTO',
+    'HOLIDAY',
+  ],
+
+
   timeOffButtons: (navigation: TypeNavStack['navigation'], vacation: TypeTimeOff, sick: TypeTimeOff) => [
     {
       navigate: () =>
@@ -1385,21 +1398,22 @@ export const ARRAY = {
   ],
 
   sourceColorMap: [
-    { source: 'holiday', color: COLORS.red },
-    { source: 'cos', color: COLORS.lightOrange }, //change of schedule
-    { source: 'ot', color: COLORS.lightBlue }, //overtime
-    { source: 'ob', color: COLORS.blue }, //official business
-    { source: 'vl', color: COLORS.lightPurple }, //vacation leave
-    { source: 'sl', color: COLORS.lightPurple }, //sick leave
-    { source: 'spl', color: COLORS.lightPurple }, //single parent leave
-    { source: 'bl', color: COLORS.lightPurple },
-    { source: 'cto', color: COLORS.lightPurple },
-    { source: 'pl', color: COLORS.lightPurple },
-    { source: 'lwp', color: COLORS.lightPurple },
-    { source: 'ml', color: COLORS.lightPurple },
-    { source: 'mc', color: COLORS.lightPurple },
-    { source: 'bdl', color: COLORS.lightPurple },
-    { source: 'el', color: COLORS.lightPurple },
-    { source: 'sal', color: COLORS.lightPurple },
+    { source: 'holiday', color: COLORS.lightRed },
+    { source: 'cos', color: COLORS.lightPeach }, //change of schedule
+    { source: 'ot', color: COLORS.lightBlueCalendar }, //overtime
+    { source: 'ob', color: COLORS.lightPurpleCalendar }, //official business
+    { source: 'vl', color: COLORS.palePink }, //vacation leave
+    { source: 'sl', color: COLORS.palePink }, //sick leave
+    { source: 'spl', color: COLORS.palePink }, //single parent leave
+    { source: 'bl', color: COLORS.palePink },
+    { source: 'cto', color: COLORS.palePink },
+    { source: 'pl', color: COLORS.palePink },
+    { source: 'lwp', color: COLORS.palePink },
+    { source: 'ml', color: COLORS.lightAqua },
+    { source: 'mc', color: COLORS.palePink },
+    { source: 'bdl', color: COLORS.palePink },
+    { source: 'el', color: COLORS.palePink },
+    { source: 'sal', color: COLORS.palePink },
+    { source: 'filo', color: COLORS.paleGreen },
   ],
 };

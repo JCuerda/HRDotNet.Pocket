@@ -2,7 +2,7 @@
 // Designed by : Alex Diane Vivienne Candano
 // Developed by: Patrick William Quintana Lofranco, Jessie Cuerda
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StatusBar } from 'react-native';
 import { View, Text, TouchableOpacity } from 'react-native';
 
@@ -18,47 +18,53 @@ import { STYLES_CALENDAR } from 'src/constants/styles/Calendar';
 import { useCalendar } from 'src/contexts/tabs';
 import { StateCalendar } from 'src/types/Types';
 import MonthYearPicker from 'src/components/modal/MonthYearPicker';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Calendar: React.FC = () => {
   const styles = STYLES_CALENDAR.Calendar;
   const { state, setState, handle, setHandle, onHandlePressDate, onHandleMonthChange, onHandleEffectI } = useCalendar();
 
-  useEffect(() => {
-    setState({ selectedDate: `${state.selectedYear}-${state.selectedMonth}-01` });
-  }, [state.selectedMonth, state.selectedYear]);
+  const [markedDates, setMarkedDates] = useState<StateCalendar['markedDates']>();
 
-  useEffect(() => {
-    onHandleEffectI();
-  }, [state.calendarDate]);
+  useFocusEffect(
+    useCallback(() => {
+      onHandleEffectI();
+    }, [state.calendarDate, state.isChangedMonth]),
+  );
 
-  useEffect(() => {
-    setMarkedDates(state.markedDates);
-  }, [state.markedDates]);
 
   useEffect(() => {
     const selectedDate = state.selected.date;
-    const formattedSelectedDate = `${selectedDate.substring(0, 4)}-${selectedDate.substring(4, 6)}-${selectedDate.substring(6, 8)}`;
 
-    setMarkedDates((prevMarkedDates: any) => {
-      const updatedMarkedDates = { ...prevMarkedDates };
-      Object.keys(updatedMarkedDates).forEach((date: any) => {
+    if (!selectedDate) {
+      return;
+    }
+
+    const formattedSelectedDate =
+      `${selectedDate.substring(0, 4)}-${selectedDate.substring(4, 6)}-${selectedDate.substring(6, 8)}`;
+
+    setMarkedDates(() => {
+      const updatedMarkedDates = {
+        ...(state.markedDates ?? {}),
+      };
+
+      Object.keys(updatedMarkedDates).forEach((date) => {
         if (updatedMarkedDates[date]?.selected) {
           delete updatedMarkedDates[date].selected;
+          delete updatedMarkedDates[date].selectedColor;
         }
       });
 
-      return {
-        ...updatedMarkedDates,
-        [formattedSelectedDate]: {
-          ...updatedMarkedDates[formattedSelectedDate],
-          selected: true,
-          selectedColor: COLORS.orange,
-        },
+      updatedMarkedDates[formattedSelectedDate] = {
+        ...updatedMarkedDates[formattedSelectedDate],
+        selected: true,
+        selectedColor: COLORS.orange,
       };
-    });
-  }, [state.selected.date]);
 
-  const [markedDates, setMarkedDates] = useState<StateCalendar['markedDates']>();
+      return updatedMarkedDates;
+    });
+  }, [state.selected.date, state.markedDates, state.isChangedMonth]);
+
 
   return (
     <React.Fragment>
